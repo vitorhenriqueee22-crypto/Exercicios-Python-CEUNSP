@@ -24,7 +24,7 @@ Este repositório reúne exercícios desenvolvidos durante a disciplina de Progr
 - Cálculos aplicados a sistemas elétricos;
 - Análise de circuitos e sistemas de potência.
 
-## Organização dos exercícios
+## Organização das atividades
 
 Os exercícios estão organizados individualmente em arquivos Python (`.py`), com identificação acadêmica, comentários e explicações.
 
