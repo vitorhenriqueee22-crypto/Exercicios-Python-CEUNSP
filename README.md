@@ -28,7 +28,7 @@ Este repositório reúne exercícios desenvolvidos durante a disciplina de Progr
 
 Os exercícios estão organizados individualmente em arquivos Python (`.py`), com identificação acadêmica, comentários e explicações.
 
-## Ferramentas utilizadas
+## Equipamentos utilizados
 
 - Python 3
 - Visual Studio Code
