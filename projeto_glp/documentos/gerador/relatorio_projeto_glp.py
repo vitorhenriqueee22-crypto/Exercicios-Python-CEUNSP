@@ -1,11 +1,11 @@
 """
-Relatório técnico-científico parcial — Fases 1 (pesquisa) e 2 (diagnóstico).
+Relatório técnico-científico do projeto — Fases 1 a 7.
 
 Projeto: Sistema inteligente de monitoramento, análise estatística e
 otimização do consumo de GLP industrial.
 
 Execução (a partir da raiz do repositório):
-    python projeto_glp/documentos/gerador/relatorio_fases_1_2.py
+    python projeto_glp/documentos/gerador/relatorio_projeto_glp.py
 
 Requisitos: python-docx; para numerar o sumário automaticamente,
 LibreOffice (soffice) e Poppler (pdftotext). Sem eles, o .docx é gerado
@@ -22,11 +22,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from abnt_docx import Conteudo, DocumentoABNT, Metadados, converter_pdf, paginar_com_libreoffice  # noqa: E402
+import capitulos_fases_3_a_7  # noqa: E402
+from abnt_docx import Conteudo, DocumentoABNT, Metadados, paginar_com_libreoffice  # noqa: E402
 
 PASTA_DOCUMENTOS = Path(__file__).resolve().parents[1]
-ARQUIVO_DOCX = PASTA_DOCUMENTOS / "Relatorio_Fases_1_e_2_GLP_ABNT.docx"
-ARQUIVO_PDF = PASTA_DOCUMENTOS / "Relatorio_Fases_1_e_2_GLP_ABNT.pdf"
+ARQUIVO_DOCX = PASTA_DOCUMENTOS / "Relatorio_Projeto_GLP_ABNT.docx"
+ARQUIVO_PDF = PASTA_DOCUMENTOS / "Relatorio_Projeto_GLP_ABNT.pdf"
 
 # Dados de identificação a completar pelo autor (não inventados):
 CIDADE = "[Cidade]"
@@ -73,52 +74,53 @@ CASO_PAYBACK_MESES = CASO_INVEST / CASO_ECON_MES  # CALCULADO (retorno simples)
 # Metadados e elementos pré-textuais
 # ---------------------------------------------------------------------------
 RESUMO = (
-    "Este relatório apresenta as duas primeiras fases do projeto de um sistema de "
-    "monitoramento, análise estatística e apoio à decisão para o consumo de gás liquefeito "
-    "de petróleo (GLP) em uma indústria mecânica, considerando três usos finais: fundição de "
-    "peças, restaurante industrial e aquecimento de água para chuveiros. Na Fase 1, foi "
-    "realizada pesquisa técnica em publicações da Agência Nacional do Petróleo, Gás Natural e "
-    "Biocombustíveis, do Instituto Nacional de Metrologia, Qualidade e Tecnologia, em normas "
-    "da família ABNT NBR ISO 50001, no Protocolo Internacional de Medição e Verificação de "
-    "Performance e em artigos e trabalhos acadêmicos. Foram consolidados o fator de conversão "
-    f"de massa de GLP em energia (poder calorífico inferior de {fmt(PCI_KCAL_KG, 0)} kcal/kg, "
-    "valor médio adotado pelo Balanço Energético Nacional), as equações de consumo específico, "
-    "custo e eficiência, os indicadores de desempenho energético de cada setor e os métodos "
-    "estatísticos para descrever o consumo, detectar anomalias e verificar se intervenções "
-    "reduziram o consumo, entre eles os testes t pareado e de Welch, o teste de Shapiro-Wilk, "
-    "os testes de Wilcoxon e de Mann-Whitney, os intervalos de confiança, a regressão linear e "
-    "o gráfico de somas acumuladas. Também foram registradas lacunas, como a ausência, nas "
-    "fontes consultadas, de valores públicos e confiáveis de consumo de GLP por refeição. Na "
-    "Fase 2, foi diagnosticado o repositório existente, composto por 24 exercícios "
-    "independentes de programação sem relação com GLP, e foi proposta uma arquitetura modular "
-    "em Python, isolada dos exercícios, com rastreabilidade da origem de cada dado: medido, de "
-    "referência, calculado, hipotético ou simulado. Conclui-se que o sistema é viável com "
-    "bibliotecas de código aberto, mas que qualquer conclusão sobre a empresa depende da coleta "
-    "de dados reais, preferencialmente com medição por setor."
+    "Este relatório apresenta o desenvolvimento de um sistema de monitoramento, análise "
+    "estatística e apoio à decisão para o consumo de gás liquefeito de petróleo (GLP) em uma "
+    "indústria mecânica, considerando três usos finais: fundição de peças, restaurante "
+    "industrial e aquecimento de água para chuveiros. O trabalho foi organizado em sete fases. "
+    "Na pesquisa, foram consolidados, com fontes identificadas, o fator de conversão de massa "
+    f"de GLP em energia (poder calorífico inferior de {fmt(PCI_KCAL_KG, 0)} kcal/kg, adotado pelo "
+    "Balanço Energético Nacional), as equações de consumo específico, custo e eficiência, os "
+    "indicadores de cada setor e os métodos estatísticos para descrever o consumo, detectar "
+    "anomalias e verificar se intervenções reduziram o consumo. No diagnóstico, verificou-se que "
+    "o repositório existente continha apenas exercícios independentes, que foram preservados. "
+    "Na modelagem e no desenvolvimento, foi construída em Python uma ferramenta modular com "
+    "importação e validação de planilhas, banco de dados SQLite, painel interativo em Streamlit "
+    "com dez páginas, simulação de cenários de economia e monitoramento virtual do reservatório, "
+    "com a origem de cada dado sempre identificada como medida, de referência, calculada, "
+    "hipotética ou simulada. Como não havia medições da empresa, o sistema foi testado com dados "
+    "sintéticos que continham intervenções e anomalias conhecidas: os testes automatizados "
+    "foram aprovados, as anomalias inseridas foram detectadas e a redução de 8 % simulada em um "
+    "forno foi estimada com intervalo de confiança que contém o valor verdadeiro. Os testes "
+    "também evidenciaram limitações, como a multicolinearidade entre horas de operação e massa "
+    "fundida e a autocorrelação dos resíduos, que orientam os requisitos de coleta de dados "
+    "reais. Conclui-se que a ferramenta está pronta para receber dados medidos, mas que as "
+    "conclusões sobre a empresa dependem dessa coleta, preferencialmente com medição por setor."
 )
 
 ABSTRACT = (
-    "This report presents the first two phases of the design of a system for monitoring, "
-    "statistical analysis and decision support for liquefied petroleum gas (LPG) consumption "
-    "in a mechanical industry, covering three end uses: metal casting, an industrial "
-    "restaurant and water heating for employee showers. In Phase 1, a technical review was "
-    "carried out on publications of the Brazilian National Agency of Petroleum, Natural Gas "
-    "and Biofuels, the Brazilian National Institute of Metrology, Quality and Technology, the "
-    "ABNT NBR ISO 50001 family of standards, the International Performance Measurement and "
-    "Verification Protocol, and scientific papers and theses. The review consolidated the "
-    f"mass-to-energy conversion factor for LPG (lower heating value of {fmt(PCI_KCAL_KG, 0)} "
-    "kcal/kg, the average value adopted by the Brazilian Energy Balance), the equations for "
-    "specific consumption, cost and efficiency, the energy performance indicators of each "
-    "sector, and the statistical methods used to describe consumption, detect anomalies and "
-    "verify whether interventions reduced consumption, including the paired and Welch t-tests, "
-    "the Shapiro-Wilk test, the Wilcoxon and Mann-Whitney tests, confidence intervals, linear "
-    "regression and cumulative sum charts. Gaps were also recorded, such as the absence, in the "
-    "sources consulted, of reliable public benchmarks for LPG consumption per meal. In Phase 2, "
-    "the existing repository, made up of 24 independent programming exercises unrelated to LPG, "
-    "was assessed, and a modular Python architecture was proposed, isolated from the exercises "
-    "and tracing the origin of every value: measured, reference, calculated, hypothetical or "
-    "simulated. The system is feasible with open-source libraries, but any conclusion about the "
-    "company depends on collecting real data, preferably with metering by sector."
+    "This report presents the development of a system for monitoring, statistical analysis and "
+    "decision support for liquefied petroleum gas (LPG) consumption in a mechanical industry, "
+    "covering three end uses: metal casting, an industrial restaurant and water heating for "
+    "employee showers. The work was organized in seven phases. The research phase "
+    "consolidated, with identified sources, the mass-to-energy conversion factor for LPG "
+    f"(lower heating value of {fmt(PCI_KCAL_KG, 0)} kcal/kg, adopted by the Brazilian Energy "
+    "Balance), the equations for specific consumption, cost and efficiency, the indicators of "
+    "each sector, and the statistical methods used to describe consumption, detect anomalies and "
+    "verify whether interventions reduced consumption. The assessment phase found that the "
+    "existing repository contained only independent exercises, which were preserved. In the "
+    "modeling and development phases, a modular Python tool was built with spreadsheet import "
+    "and validation, an SQLite database, a ten-page interactive Streamlit dashboard, savings "
+    "scenario simulation and virtual tank monitoring, always identifying the origin of each "
+    "value as measured, reference, calculated, hypothetical or simulated. Since no company "
+    "measurements were available, the system was tested with synthetic data containing known "
+    "interventions and anomalies: the automated tests passed, the inserted anomalies were "
+    "detected, and the simulated 8 % reduction in one furnace was estimated with a confidence "
+    "interval containing the true value. The tests also revealed limitations, such as "
+    "multicollinearity between operating hours and melted mass and autocorrelated residuals, "
+    "which guide the requirements for collecting real data. The tool is ready to receive "
+    "measured data, but conclusions about the company depend on that collection, preferably "
+    "with metering by sector."
 )
 
 SIGLAS = [
@@ -151,7 +153,9 @@ SIGLAS = [
     ("PCS", "Poder calorífico superior"),
     ("PIMVP", "Protocolo Internacional de Medição e Verificação de Performance"),
     ("SGE", "Sistema de gestão da energia"),
+    ("SQL", "*Structured Query Language* (linguagem de consulta estruturada)"),
     ("tep", "Tonelada equivalente de petróleo"),
+    ("VIF", "*Variance inflation factor* (fator de inflação da variância)"),
     ("WCM", "*World Class Manufacturing*"),
 ]
 
@@ -186,21 +190,21 @@ META = Metadados(
     instituicao=["Centro Universitário Nossa Senhora do Patrocínio", "Curso de Engenharia Elétrica"],
     autor="Vitor Henrique Santos Das Virgens",
     titulo="Sistema inteligente de monitoramento, análise estatística e otimização do consumo de GLP industrial",
-    subtitulo="fundamentação técnico-científica, diagnóstico do repositório e proposta de arquitetura (Fases 1 e 2)",
+    subtitulo="fundamentação, desenvolvimento, testes e validação de uma ferramenta de apoio à decisão",
     natureza=(
-        "Relatório técnico-científico parcial apresentado à disciplina de Experimentação e "
-        "Análise de Dados do curso de Engenharia Elétrica do Centro Universitário Nossa Senhora "
-        "do Patrocínio (CEUNSP), referente às Fases 1 (pesquisa) e 2 (diagnóstico) do projeto."
+        "Relatório técnico-científico apresentado à disciplina de Experimentação e Análise de "
+        "Dados do curso de Engenharia Elétrica do Centro Universitário Nossa Senhora do "
+        "Patrocínio (CEUNSP), referente às Fases 1 a 7 do projeto."
     ),
     orientador=ORIENTADOR,
     local=CIDADE,
     ano="2026",
     resumo=RESUMO,
     palavras_chave=["GLP", "eficiência energética", "inferência estatística",
-                    "monitoramento energético", "indicadores de desempenho energético"],
+                    "monitoramento energético", "painel de indicadores"],
     abstract=ABSTRACT,
     keywords=["LPG", "energy efficiency", "statistical inference", "energy monitoring",
-              "energy performance indicators"],
+              "dashboard"],
     siglas=SIGLAS,
     simbolos=SIMBOLOS,
 )
@@ -321,20 +325,20 @@ def montar_conteudo() -> Conteudo:
     c.h2("1.5", "ORGANIZAÇÃO DO TRABALHO EM FASES")
     c.p(
         "O desenvolvimento foi dividido em sete fases, com validação ao final de cada uma antes "
-        "de avançar para a seguinte (Quadro 2). Este relatório cobre as Fases 1 e 2 e encerra "
-        "com uma proposta de arquitetura que depende de validação para dar início à Fase 3."
+        "de avançar para a seguinte (Quadro 2). Os capítulos 2 a 8 deste relatório "
+        "correspondem às Fases 1 a 7, e o capítulo 9 traz as considerações finais."
     )
     c.quadro(
-        "Fases do projeto e situação atual",
-        ["Fase", "Conteúdo", "Situação"],
+        "Fases do projeto e capítulos correspondentes",
+        ["Fase", "Conteúdo", "Capítulo"],
         [
-            ["1 – Pesquisa", "Fundamentação técnica, fórmulas, indicadores e métodos", "Concluída neste relatório"],
-            ["2 – Diagnóstico", "Análise do repositório existente", "Concluída neste relatório"],
-            ["3 – Modelagem", "Estrutura de dados, fórmulas e métodos detalhados", "Aguardando validação"],
-            ["4 – Desenvolvimento", "Módulos Python e painel em Streamlit", "Não iniciada"],
-            ["5 – Testes", "Cálculos, importação, gráficos, filtros e estatística", "Não iniciada"],
-            ["6 – Documentação", "README de instalação, execução e uso", "Não iniciada"],
-            ["7 – Validação", "Limitações, hipóteses e requisitos de implantação", "Não iniciada"],
+            ["1 – Pesquisa", "Fundamentação técnica, fórmulas, indicadores e métodos", "2"],
+            ["2 – Diagnóstico", "Análise do repositório existente", "3"],
+            ["3 – Modelagem", "Estrutura de dados, validações, parâmetros e arquitetura", "4"],
+            ["4 – Desenvolvimento", "Módulos Python, painel em Streamlit e linha de comando", "5"],
+            ["5 – Testes", "Testes automatizados e verificação com gabarito simulado", "6"],
+            ["6 – Documentação", "Instalação, execução e uso", "7"],
+            ["7 – Validação", "Limitações, requisitos de dados reais e implantação", "8"],
         ],
         [3.5, 8.0, 4.5],
         FONTE_AUTOR,
@@ -1115,195 +1119,15 @@ def montar_conteudo() -> Conteudo:
     ])
     c.h2("3.4", "DECISÃO")
     c.p(
-        "Os exercícios são registros de atividades avaliadas e serão preservados sem alteração; "
-        "os pontos da seção 3.3 ficam apenas registrados. O sistema de GLP será desenvolvido em "
+        "Os exercícios são registros de atividades avaliadas e foram preservados sem alteração; "
+        "os pontos da seção 3.3 ficam apenas registrados. O sistema de GLP foi desenvolvido em "
         "uma pasta própria, projeto_glp, isolada dos exercícios. Nenhuma funcionalidade "
-        "existente será removida ou substituída. A inclusão de uma seção no README principal "
-        "com o link para o projeto depende de aprovação."
+        "existente foi removida ou substituída. A inclusão de uma seção no README principal "
+        "com o link para o projeto depende de aprovação do autor."
     )
 
-    # =====================================================================
-    c.h1("4", "PROPOSTA DE ARQUITETURA (PARA VALIDAÇÃO)")
-    c.h2("4.1", "PRINCÍPIOS")
-    c.alineas([
-        "modularidade: cada setor e cada método estatístico em um módulo próprio, reutilizável e "
-        "testável",
-        "rastreabilidade: toda leitura e todo parâmetro com classe de origem (Quadro 3) e fonte",
-        "separação entre dados reais e simulados: pastas, tabelas e rótulos distintos, e "
-        "bloqueio de análises que misturem as duas origens sem autorização explícita",
-        "somente leitura: nenhum comando para equipamentos ou dispositivos de segurança",
-        "reprodutibilidade: dados simulados gerados com semente fixa e hipóteses registradas",
-        "transparência: fórmulas documentadas no código e neste relatório",
-    ])
-    c.h2("4.2", "ESTRUTURA DE DIRETÓRIOS")
-    c.p(
-        "A Figura 1 apresenta a estrutura proposta, adaptada da sugerida no escopo. As "
-        "principais adaptações são a pasta de configuração, os módulos de importação, "
-        "validação, anomalias e reservatório, a pasta de testes e a organização do painel em "
-        "páginas, que o Streamlit carrega a partir da pasta pages."
-    )
-    c.figura_texto(
-        "Estrutura de diretórios proposta",
-        [
-            "projeto_glp/",
-            "├── dados/",
-            "│   ├── dados_reais/         planilhas da empresa (não versionadas se sigilosas)",
-            "│   ├── dados_simulados/     séries sintéticas rotuladas como SIMULADO",
-            "│   └── referencias/         parâmetros de referência com fonte (CSV)",
-            "├── config/parametros.toml   preços, capacidades, hipóteses editáveis",
-            "├── documentos/              relatórios ABNT e gerador",
-            "├── resultados/              tabelas exportadas",
-            "├── graficos/                figuras exportadas",
-            "├── src/",
-            "│   ├── constantes.py        PCI, conversões e fontes",
-            "│   ├── importacao.py        leitura de CSV e Excel",
-            "│   ├── validacao.py         regras de qualidade dos dados",
-            "│   ├── banco_dados.py       histórico em SQLite",
-            "│   ├── indicadores.py       consumo, custo, consumo específico, participação",
-            "│   ├── estatistica.py       descritiva, testes, IC, correlação, regressão",
-            "│   ├── anomalias.py         Tukey, escore z robusto, I-MR, CUSUM",
-            "│   ├── fundicao.py          fornos, balanço térmico, indicadores",
-            "│   ├── restaurante.py       refeições, modelo de consumo, indicadores",
-            "│   ├── chuveiros.py         demanda térmica, perdas, indicadores",
-            "│   ├── reservatorio.py      balanço de massa, autonomia, alertas",
-            "│   ├── simulacao.py         cenários de economia",
-            "│   └── dados_simulados.py   gerador de dados sintéticos",
-            "├── pages/                   páginas do painel Streamlit",
-            "├── tests/                   testes automatizados (pytest)",
-            "├── dashboard.py             página inicial do painel",
-            "├── main.py                  linha de comando: importar, validar, relatar",
-            "├── requirements.txt",
-            "└── README.md",
-        ],
-        FONTE_AUTOR,
-    )
-    c.h2("4.3", "MODELO DE DADOS")
-    c.p(
-        "O registro de consumo, unidade básica do sistema, terá os campos do Quadro 12. "
-        "Tabelas auxiliares guardarão o cadastro de equipamentos (Quadro 4), os abastecimentos "
-        "(data, massa, preço e nota fiscal), os parâmetros (nome, valor, unidade, classe de "
-        "origem e fonte) e as intervenções (descrição, setor ou equipamento, data de início), "
-        "usadas nas análises de antes e depois."
-    )
-    c.quadro(
-        "Campos do registro de consumo",
-        ["Campo", "Tipo", "Obrigatório", "Observação"],
-        [
-            ["data", "data (AAAA-MM-DD)", "Sim", "Não pode ser futura"],
-            ["hora", "hora (HH:MM)", "Não", "Necessária para perfis horários"],
-            ["setor", "texto", "Sim", "FUNDICAO, RESTAURANTE, CHUVEIROS ou GERAL"],
-            ["equipamento_id", "texto", "Não", "Deve existir no cadastro"],
-            ["consumo_valor", "número", "Sim", "Não negativo"],
-            ["consumo_unidade", "texto", "Sim", "kg; m³ só com fator de conversão explícito"],
-            ["atividade_valor", "número", "Não", "Produção, refeições, usuários, banhos ou ciclos"],
-            ["atividade_unidade", "texto", "Se houver atividade", "Compatível com o setor"],
-            ["tempo_funcionamento_h", "número", "Não", "Entre 0 e 24 por dia"],
-            ["temperatura_c", "número", "Não", "Temperatura de processo ou da água"],
-            ["origem", "texto", "Sim", "MEDIDO ou SIMULADO"],
-            ["observacoes", "texto", "Não", "Livre"],
-        ],
-        [4.0, 3.4, 2.8, 5.8],
-        FONTE_AUTOR,
-    )
-    c.h2("4.4", "REGRAS DE VALIDAÇÃO")
-    c.quadro(
-        "Regras de validação na importação",
-        ["Verificação", "Regra", "Tratamento"],
-        [
-            ["Campos vazios", "Campos obrigatórios preenchidos", "Erro: registro rejeitado"],
-            ["Valores negativos", "Consumo, atividade e horas ≥ 0", "Erro"],
-            ["Registros duplicados", "Mesma data, hora, setor e equipamento", "Aviso; mantém o primeiro"],
-            ["Datas inválidas", "Formato válido e data não futura", "Erro"],
-            ["Unidades incompatíveis", "Unidade permitida para o setor; m³ sem fator", "Erro"],
-            ["Leituras inconsistentes", "Consumo acima do máximo nominal × horas; medidor acumulado decrescente", "Aviso para revisão"],
-            ["Dados ausentes", "Lacunas na série diária", "Aviso; não interpola sem autorização"],
-            ["Mistura de origens", "MEDIDO e SIMULADO na mesma análise", "Bloqueio, salvo escolha explícita"],
-        ],
-        [3.8, 7.0, 5.2],
-        FONTE_AUTOR,
-        nota="o sistema não corrige dados silenciosamente; toda rejeição ou aviso é registrado em relatório de importação.",
-    )
-    c.h2("4.5", "FLUXO DE DADOS")
-    c.figura_fluxo(
-        "Fluxo de dados proposto",
-        [
-            ("Importação", "CSV e Excel"),
-            ("Validação", "regras do Quadro 13"),
-            ("Banco", "SQLite"),
-            ("Indicadores", "Quadros 5 a 7"),
-            ("Estatística", "testes e anomalias"),
-            ("Painel", "Streamlit e relatórios"),
-        ],
-        FONTE_AUTOR,
-    )
-    c.h2("4.6", "BIBLIOTECAS")
-    c.quadro(
-        "Bibliotecas propostas e justificativas",
-        ["Biblioteca", "Uso", "Justificativa"],
-        [
-            ["pandas", "Tabelas, séries temporais e importação", "Padrão para dados tabulares (McKinney, 2010)"],
-            ["NumPy", "Cálculo numérico e regressão por mínimos quadrados", "Base do ecossistema científico (Harris et al., 2020)"],
-            ["SciPy", "Testes estatísticos e distribuições", "Implementa Shapiro-Wilk, t, Wilcoxon e Mann-Whitney (Virtanen et al., 2020)"],
-            ["Plotly", "Gráficos interativos", "Interatividade no painel (Plotly Technologies, 2015)"],
-            ["Streamlit", "Painel web", "Painel em Python puro, sem desenvolvimento web separado (Streamlit, 2026)"],
-            ["openpyxl", "Leitura de arquivos .xlsx pelo pandas", "Exigida para importar Excel"],
-            ["sqlite3", "Banco de dados histórico", "Biblioteca padrão do Python, sem servidor"],
-            ["Matplotlib", "Figuras estáticas para relatórios", "Opcional, apenas se necessário"],
-            ["pytest", "Testes automatizados", "Uso apenas em desenvolvimento"],
-        ],
-        [3.0, 5.6, 7.4],
-        FONTE_AUTOR,
-        nota="a regressão será implementada com NumPy e SciPy; uma biblioteca adicional de modelos "
-             "estatísticos só será incluída se houver necessidade justificada na Fase 3.",
-    )
-    c.h2("4.7", "PÁGINAS DO PAINEL")
-    c.quadro(
-        "Páginas propostas para o painel interativo",
-        ["Página", "Conteúdo principal"],
-        [
-            ["Visão geral", "Consumo e custo totais, setor de maior consumo, evolução, participação por setor, alertas"],
-            ["Fundição", "Consumo por forno, kg/h, kg/t, kg/ciclo, R$/t, tempo sem carga, eficiência estimada"],
-            ["Restaurante", "kg/dia, kg/refeição, R$/refeição, modelo em função das refeições, perfil semanal"],
-            ["Chuveiros", "kg/dia, kg/usuário, perfil horário, demanda térmica, consumo fora do horário"],
-            ["Comparação entre setores", "Consumo, participação, custo, consumo específico e evolução histórica"],
-            ["Análise estatística", "Descritiva, normalidade, testes antes e depois, IC, correlação e regressão"],
-            ["Simulação de economia", "Cenários de redução com preço, consumo, dias e atividade editáveis"],
-            ["Reservatório", "Estoque virtual, percentual, autonomia, abastecimentos e alertas de nível"],
-            ["Base de dados", "Importação, relatório de validação, filtros e exportação"],
-            ["Relatórios", "Resumo por período para impressão e exportação"],
-        ],
-        [4.4, 11.6],
-        FONTE_AUTOR,
-        nota="todas as páginas exibirão a origem dos dados (MEDIDO ou SIMULADO) de forma visível.",
-    )
-
-    # =====================================================================
-    c.h1("5", "CONSIDERAÇÕES FINAIS E PONTOS PARA VALIDAÇÃO")
-    c.p(
-        "A Fase 1 consolidou os fundamentos necessários ao sistema: a conversão de massa de GLP "
-        "em energia com fonte identificada, as fórmulas de custo, consumo específico e "
-        "eficiência, os indicadores de cada setor, os métodos estatísticos para comparar "
-        "períodos e avaliar intervenções e o modelo de monitoramento virtual do reservatório. "
-        "A pesquisa também mostrou que não há, nas fontes consultadas, valores públicos "
-        "confiáveis para todos os indicadores; nesses casos, a referência será a linha de base "
-        "construída com dados da própria empresa."
-    )
-    c.p(
-        "A Fase 2 mostrou que o repositório atual não contém código relacionado a GLP e que os "
-        "exercícios devem ser preservados. A arquitetura proposta isola o novo sistema e "
-        "aproveita padrões e conceitos já praticados nos exercícios."
-    )
-    c.p("Antes de iniciar a Fase 3 (modelagem), é necessário validar:")
-    c.alineas([
-        "a arquitetura, o modelo de dados e as regras de validação propostos no capítulo 4",
-        "a existência de dados reais da empresa (notas fiscais de abastecimento, leituras de "
-        "medidores, registros de produção, refeições e usuários) e o formato em que estão",
-        "a lista de fornos e demais equipamentos a gás, com tipo, função e dados de placa",
-        "a existência de medição por setor ou apenas do consumo total",
-        "o preço do GLP a ser usado (nota fiscal mais recente ou média de um período)",
-        "os dados de identificação deste relatório (cidade e nome do professor) e a inclusão "
-        "do link para o projeto no README principal",
-    ])
+    # Capítulos 4 a 9 (Fases 3 a 7): ver capitulos_fases_3_a_7.py
+    capitulos_fases_3_a_7.adicionar(c, FONTE_AUTOR)
 
     # =====================================================================
     c.referencias([

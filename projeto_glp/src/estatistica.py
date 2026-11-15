@@ -28,6 +28,12 @@ from scipy import stats
 ALFA_PADRAO = 0.05
 
 
+def _br(valor, formato: str) -> str:
+    """Formata número com vírgula decimal (padrão brasileiro)."""
+    texto = format(valor, formato)
+    return texto.replace(",", "X").replace(".", ",").replace("X", ".")
+
+
 # ---------------------------------------------------------------------------
 # Estatística descritiva
 # ---------------------------------------------------------------------------
@@ -206,12 +212,12 @@ def comparar_antes_depois(antes, depois, pareado: bool, alfa: float = ALFA_PADRA
     ic_pct = tuple(v / media_a * 100 for v in ic) if media_a else (np.nan, np.nan)
     significativo = bool(p < alfa)
     if significativo:
-        conclusao = (f"Rejeita-se H0 ao nível de {alfa:.0%}: há evidência estatística de "
-                     f"redução média de {reducao:.3g} ({reducao_pct:.1f} %), com IC 95 % de "
-                     f"{ic[0]:.3g} a {ic[1]:.3g}.")
+        conclusao = (f"Rejeita-se H0 ao nível de {_br(alfa * 100, '.0f')} %: há evidência estatística de "
+                     f"redução média de {_br(reducao, '.3g')} ({_br(reducao_pct, '.1f')} %), com IC 95 % "
+                     f"de {_br(ic[0], '.3g')} a {_br(ic[1], '.3g')}.")
     else:
-        conclusao = (f"Não se rejeita H0 ao nível de {alfa:.0%}: os dados não permitem afirmar "
-                     f"que houve redução (p = {p:.3g}).")
+        conclusao = (f"Não se rejeita H0 ao nível de {_br(alfa * 100, '.0f')} %: os dados não permitem "
+                     f"afirmar que houve redução (p = {_br(p, '.3g')}).")
     if min(len(a), len(b)) < 10:
         ressalvas.append("Amostra pequena: o teste tem baixo poder; uma redução real pode não ser detectada.")
     ressalvas.append("Séries diárias podem ser autocorrelacionadas; verifique o Durbin-Watson "

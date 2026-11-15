@@ -54,6 +54,14 @@ def pct(valor, casas: int = 1) -> str:
     return f"{num(valor, casas)} %"
 
 
+def valor_p(p) -> str:
+    """Valor p legível: notação científica abaixo de 0,001."""
+    if p is None or not np.isfinite(p):
+        return "—"
+    texto = f"{p:.2e}" if p < 0.001 else f"{p:.3f}"
+    return texto.replace(".", ",")
+
+
 def massa(kg) -> str:
     """Massa compacta para cartões: kg até 10 t; acima, em toneladas."""
     return f"{num(kg / 1000, 1)} t" if abs(kg) >= 10_000 else f"{num(kg)} kg"
@@ -271,6 +279,6 @@ def nota_responsabilidade() -> None:
 __all__ = [
     "COR_STATUS", "Contexto", "alerta", "baixar_csv", "barra_lateral", "cabecalho",
     "contexto", "cor_setor", "grafico", "layout", "limpar_cache", "linha_tempo",
-    "massa", "nome_setor", "nota_responsabilidade", "num", "pct", "reais",
+    "massa", "nome_setor", "valor_p", "nota_responsabilidade", "num", "pct", "reais",
     "reais_compacto", "sem_dados",
 ]

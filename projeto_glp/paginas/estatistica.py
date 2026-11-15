@@ -33,7 +33,9 @@ if setor == FUNDICAO:
     equipamento = c[1].selectbox("Forno", fornos, key="est_forno")
 variaveis = relatorios.VARIAVEIS[setor]
 d = relatorios.tabela_diaria(ctx.dados, setor, equipamento, ctx.preco)
-metrica = c[2].selectbox("Variável analisada", list(variaveis), format_func=variaveis.get, key="est_metrica")
+metrica = c[2].selectbox("Variável analisada", list(variaveis), index=1, format_func=variaveis.get,
+                         key="est_metrica", help="Para avaliar intervenções, prefira o consumo específico "
+                         "(normalizado pela atividade).")
 serie = d[["data", metrica]].dropna()
 if setor == FUNDICAO and metrica in ("kg_por_t", "kg_por_h"):
     serie = serie[np.isfinite(serie[metrica])]
@@ -83,7 +85,7 @@ with aba_norm:
     sw = estatistica.shapiro_wilk(serie[metrica])
     c = st.columns(3)
     c[0].metric("Estatística W", painel.num(sw.estatistica, 4), border=True)
-    c[1].metric("Valor p", f"{sw.p_valor:.3g}" if np.isfinite(sw.p_valor) else "—", border=True)
+    c[1].metric("Valor p", painel.valor_p(sw.p_valor), border=True)
     c[2].metric("Conclusão (α = 5 %)", "Normalidade aceita" if sw.normal else "Normalidade rejeitada", border=True)
     st.markdown("**H₀:** os dados seguem distribuição normal · **H₁:** não seguem (Shapiro; Wilk, 1965).")
     if sw.observacao:
@@ -159,7 +161,7 @@ with aba_teste:
         c[2].metric("Redução média", painel.pct(resultado.reducao_percentual), border=True,
                     help=f"IC 95 %: {painel.pct(resultado.ic95_reducao_percentual[0])} a "
                          f"{painel.pct(resultado.ic95_reducao_percentual[1])}")
-        c[3].metric("Valor p", f"{resultado.p_valor:.3g}", border=True, help=resultado.teste)
+        c[3].metric("Valor p", painel.valor_p(resultado.p_valor), border=True, help=resultado.teste)
         c[4].metric("Tamanho de efeito", painel.num(resultado.tamanho_efeito, 2), border=True,
                     help="Diferença média em desvios-padrão (Cohen, 1988).")
         (st.success if resultado.significativo else st.warning)(
@@ -167,7 +169,7 @@ with aba_teste:
             icon=":material/check_circle:" if resultado.significativo else ":material/help:")
         for chave, norm in resultado.normalidade.items():
             st.caption(f"Shapiro-Wilk ({chave}): W = {painel.num(norm.estatistica, 3)}, "
-                       f"p = {norm.p_valor:.3g} → {'normal' if norm.normal else 'não normal'}.")
+                       f"p = {painel.valor_p(norm.p_valor)} → {'normal' if norm.normal else 'não normal'}.")
         for ressalva in resultado.ressalvas:
             st.caption(f":material/warning: {ressalva}")
         fig = go.Figure()

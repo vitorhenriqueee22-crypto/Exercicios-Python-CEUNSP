@@ -139,6 +139,15 @@ class Conteudo:
         }))
         return self._n_figura
 
+    def figura_imagem(self, titulo: str, caminho, fonte: str, largura_cm: float = 15.0) -> int:
+        """Figura a partir de arquivo de imagem (PNG/JPG)."""
+        self._n_figura += 1
+        self.blocos.append(Bloco("figura_imagem", {
+            "n": self._n_figura, "titulo": titulo, "caminho": str(caminho), "fonte": fonte,
+            "largura": largura_cm,
+        }))
+        return self._n_figura
+
     def figura_fluxo(self, titulo: str, etapas: list[tuple[str, str]], fonte: str) -> int:
         """Figura de fluxo linear: [(nome_etapa, descrição_curta), ...]."""
         self._n_figura += 1
@@ -162,7 +171,7 @@ class Conteudo:
         for b in self.blocos:
             if b.tipo == "tabela" and b.dados["rotulo"] == "Quadro":
                 saida.append(f"Quadro {b.dados['n']} – {b.dados['titulo']}")
-            elif b.tipo in ("figura_texto", "figura_fluxo"):
+            elif b.tipo in ("figura_texto", "figura_fluxo", "figura_imagem"):
                 saida.append(f"Figura {b.dados['n']} – {b.dados['titulo']}")
         return saida
 
@@ -637,6 +646,13 @@ class DocumentoABNT:
             self._figura_texto(d)
         elif t == "figura_fluxo":
             self._figura_fluxo(d)
+        elif t == "figura_imagem":
+            self._legenda(f"Figura {d['n']} – {d['titulo']}")
+            par = self.doc.add_paragraph()
+            _formatar(par, alinhamento=WD_ALIGN_PARAGRAPH.CENTER, entrelinha=1.0,
+                      manter_com_proximo=True)
+            par.add_run().add_picture(d["caminho"], width=Cm(d["largura"]))
+            self._fonte(d["fonte"], None)
         elif t == "referencias":
             for ref in d["itens"]:
                 par = self.doc.add_paragraph()
@@ -834,6 +850,6 @@ def _ordenar_por_aparicao(conteudo: Conteudo) -> list[str]:
             chaves.append(chave_de(f"{d['ind'] or ''} {d['titulo']}"))
         elif b.tipo == "tabela":
             chaves.append(chave_de(f"{d['rotulo']} {d['n']} – {d['titulo']}"))
-        elif b.tipo in ("figura_texto", "figura_fluxo"):
+        elif b.tipo in ("figura_texto", "figura_fluxo", "figura_imagem"):
             chaves.append(chave_de(f"Figura {d['n']} – {d['titulo']}"))
     return chaves
