@@ -406,12 +406,16 @@ class DocumentoABNT:
         secao.header.is_linked_to_previous = False
         self._folha_rosto()
         self._resumo("RESUMO", self.meta.resumo, "Palavras-chave", self.meta.palavras_chave)
-        self._resumo("ABSTRACT", self.meta.abstract, "Keywords", self.meta.keywords)
-        self._lista("LISTA DE ILUSTRAÇÕES", self.conteudo.entradas_ilustracoes())
+        if self.meta.abstract:
+            self._resumo("ABSTRACT", self.meta.abstract, "Keywords", self.meta.keywords)
+        if self.conteudo.entradas_ilustracoes():
+            self._lista("LISTA DE ILUSTRAÇÕES", self.conteudo.entradas_ilustracoes())
         if self.conteudo.entradas_tabelas():
             self._lista("LISTA DE TABELAS", self.conteudo.entradas_tabelas())
-        self._lista_duas_colunas("LISTA DE ABREVIATURAS E SIGLAS", self.meta.siglas, 3.0)
-        self._lista_duas_colunas("LISTA DE SÍMBOLOS", self.meta.simbolos, 3.0)
+        if self.meta.siglas:
+            self._lista_duas_colunas("LISTA DE ABREVIATURAS E SIGLAS", self.meta.siglas, 3.0)
+        if self.meta.simbolos:
+            self._lista_duas_colunas("LISTA DE SÍMBOLOS", self.meta.simbolos, 3.0)
         self._sumario()
 
         secao = self.doc.add_section(WD_SECTION.NEW_PAGE)

@@ -26,9 +26,12 @@ O sistema mede, analisa e recomenda. **Não envia comandos** a reguladores, vál
 | 6 – Documentação | Este README e o relatório ABNT | Concluída |
 | 7 – Validação | Limitações, hipóteses e requisitos para implantação | Concluída (no relatório) |
 
-O relatório completo, formatado pelas normas ABNT, está em
-[`documentos/Relatorio_Projeto_GLP_ABNT.docx`](documentos/Relatorio_Projeto_GLP_ABNT.docx)
-(e em [PDF](documentos/Relatorio_Projeto_GLP_ABNT.pdf)).
+## Documentos (normas ABNT)
+
+| Documento | Conteúdo |
+|---|---|
+| **Trabalho escrito da proposta** — [`Proposta_Projeto_GLP_ABNT.docx`](documentos/Proposta_Projeto_GLP_ABNT.docx) ([PDF](documentos/Proposta_Projeto_GLP_ABNT.pdf)) | Entregável da disciplina, na estrutura pedida: Resumo, Contexto e Problema de Engenharia, Formulação das Hipóteses Estatísticas, Metodologia de Inferência Estatística e Referências (27 páginas) |
+| Relatório técnico do sistema — [`Relatorio_Projeto_GLP_ABNT.docx`](documentos/Relatorio_Projeto_GLP_ABNT.docx) ([PDF](documentos/Relatorio_Projeto_GLP_ABNT.pdf)) | Material de apoio: pesquisa, diagnóstico, arquitetura, desenvolvimento, testes e validação (61 páginas) |
 
 ## Instalação
 
@@ -146,14 +149,16 @@ projeto_glp/
 - Uma redução percentual isolada não prova melhoria: a avaliação usa teste de hipóteses, IC 95 % e verificação de comparabilidade.
 - Ajustes em equipamentos de GLP são recomendações para avaliação por profissionais habilitados.
 
-## Gerar o relatório ABNT
+## Gerar os documentos ABNT
 
 ```bash
 pip install python-docx
-python documentos/gerador/relatorio_projeto_glp.py
+python documentos/gerador/proposta_projeto.py        # trabalho escrito da proposta
+python documentos/gerador/relatorio_projeto_glp.py   # relatório técnico do sistema
 ```
 
 Com LibreOffice (`soffice`) e Poppler (`pdftotext`) instalados, o sumário é numerado automaticamente e o PDF é gerado.
-Antes de entregar, complete `[Cidade]` e o nome do(a) professor(a) nas constantes `CIDADE` e `ORIENTADOR` do gerador.
+Antes de entregar, complete `[Cidade]`, o nome do(a) professor(a) e os integrantes do grupo (até 4) nas constantes
+`CIDADE`, `ORIENTADOR` e `INTEGRANTES` de `documentos/gerador/proposta_projeto.py` (ou edite o `.docx` no Word).
 
 Os exercícios da disciplina de Programação em Python, na raiz do repositório, não foram alterados.
