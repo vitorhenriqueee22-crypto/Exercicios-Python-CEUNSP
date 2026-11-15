@@ -1,0 +1,11 @@
+# Sistema de monitoramento de GLP — dependências
+pandas>=2.2
+numpy>=1.26
+scipy>=1.11
+plotly>=5.20
+streamlit>=1.40
+openpyxl>=3.1        # leitura e escrita de planilhas Excel
+
+# Desenvolvimento e documentação
+pytest>=8.0
+python-docx>=1.1     # geração dos relatórios ABNT

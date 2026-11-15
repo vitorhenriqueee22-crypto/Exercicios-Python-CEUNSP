@@ -1,2 +1,16 @@
 __pycache__/
 *.pyc
+.pytest_cache/
+
+# Banco gerado localmente (recriado a partir dos CSV simulados)
+dados/*.db
+
+# Dados reais da empresa: não versionar se forem sigilosos
+dados/dados_reais/*
+!dados/dados_reais/LEIA-ME.md
+
+# Saídas geradas
+resultados/*
+!resultados/.gitkeep
+graficos/*
+!graficos/.gitkeep

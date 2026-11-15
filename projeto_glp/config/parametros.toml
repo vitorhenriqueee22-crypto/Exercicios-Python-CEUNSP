@@ -1,0 +1,60 @@
+# ============================================================
+# Parâmetros do sistema de monitoramento de GLP
+# ============================================================
+# Cada parâmetro tem uma ORIGEM:
+#   REFERENCIA -> valor publicado em fonte identificada (ver "fonte")
+#   EMPRESA    -> dado fornecido pela empresa
+#   HIPOTESE   -> valor assumido na falta de dado; SUBSTITUIR quando houver dado real
+#
+# Os valores marcados como HIPOTESE NÃO descrevem a empresa.
+# O painel permite alterar os principais parâmetros durante a análise.
+
+[geral]
+preco_glp_r_por_kg = 7.00
+preco_origem = "HIPOTESE"
+preco_nota = "Substituir pelo preço da nota fiscal de abastecimento (R$/kg)."
+dias_operacao_mes = 22
+dias_operacao_ano = 264
+dias_origem = "HIPOTESE"
+
+[estatistica]
+alfa = 0.05
+limite_escore_z_robusto = 3.5     # Iglewicz e Hoaglin (1993)
+fator_tukey = 1.5                 # Tukey (1977)
+
+[reservatorio]
+capacidade_nominal_kg = 8000.0
+fracao_maxima_enchimento = 0.85
+estoque_minimo_reserva_kg = 1000.0
+nivel_alerta_percentual = 30.0
+estoque_inicial_kg = 5000.0          # estoque no início do histórico (leitura do indicador do tanque)
+origem = "HIPOTESE"
+nota = """Capacidade nominal e limite de enchimento devem vir da placa do tanque, \
+do fabricante, da distribuidora e da norma aplicável. Não confundir capacidade \
+nominal com capacidade segura de enchimento."""
+
+[restaurante]
+hora_abertura = 6
+hora_fechamento = 20
+faixas_refeicoes = [0, 200, 400, 550, 650, 2000]
+origem = "HIPOTESE"
+
+[chuveiros]
+duracao_banho_min = 8.0
+vazao_l_min = 6.0
+temperatura_saida_c = 40.0
+rendimento_aquecedor = 0.80
+origem = "HIPOTESE"
+nota = "Duração, vazão, temperaturas e rendimento são hipóteses de simulação; usar dados medidos ou do fabricante."
+
+# Propriedades térmicas usadas no balanço do forno (Equação 5 do relatório).
+# Valores aproximados para alumínio puro, a confirmar na ficha técnica da liga.
+[fundicao.liga]
+nome = "Alumínio (valores aproximados)"
+calor_especifico_solido_kj_kgk = 0.90
+calor_especifico_liquido_kj_kgk = 1.18
+calor_latente_fusao_kj_kg = 397.0
+temperatura_fusao_c = 660.0
+temperatura_inicial_c = 25.0
+origem = "HIPOTESE"
+nota = "Confirmar na ficha técnica da liga ou em manual de referência."

@@ -1,0 +1,8 @@
+parametro,valor,unidade,origem,fonte
+poder_calorifico_inferior_glp,11100,kcal/kg,REFERENCIA,"ANP. Anuário estatístico 2026: fatores de conversão (valores médios BEN/EPE)"
+massa_especifica_media_glp_liquido,0.552,t/m3,REFERENCIA,"ANP. Anuário estatístico 2026: fatores de conversão"
+kj_por_kcal,4.1868,kJ/kcal,REFERENCIA,"Caloria internacional (convenção)"
+kcal_por_tep,10000000,kcal/tep,REFERENCIA,"Convenção do Balanço Energético Nacional"
+calor_especifico_agua,4.18,kJ/(kg.K),REFERENCIA,"Bergman et al. (2014), água líquida próxima de 300 K"
+limite_escore_z_robusto,3.5,adimensional,REFERENCIA,"Iglewicz e Hoaglin (1993)"
+fator_cercas_tukey,1.5,adimensional,REFERENCIA,"Tukey (1977)"

@@ -1,0 +1,142 @@
+# ============================================================
+# HIPÓTESES DOS DADOS SIMULADOS
+# ============================================================
+# Todos os valores abaixo são HIPÓTESES usadas para gerar dados SINTÉTICOS de
+# demonstração. Eles NÃO descrevem a empresa e NÃO devem ser usados para
+# conclusões sobre o consumo real. Para regenerar:
+#     python projeto_glp/main.py gerar-simulados
+
+[periodo]
+inicio = "2025-11-01"
+dias = 365
+semente = 2026
+
+# Modelo do forno (Equação 7): G = beta_h * horas + beta_t * toneladas, com
+# ruído multiplicativo normal de desvio "ruido".
+[fornos.FORNO-01]
+nome = "Forno cadinho basculante 1"
+tipo = "Cadinho basculante"
+funcao = "Fusão"
+metal_liga = "Liga de alumínio"
+capacidade_nominal_kg = 500.0
+potencia_nominal_kg_h = 35.0
+temperatura_trabalho_c = 720.0
+dias_semana = [0, 1, 2, 3, 4]       # 0 = segunda-feira
+ciclos_min = 4
+ciclos_max = 6
+carga_t_por_ciclo = 0.45
+horas_base = 2.5
+horas_por_ciclo = 2.3
+horas_com_carga_por_ciclo = 1.6
+beta_h = 5.5                         # kg/h (perdas e manutenção de temperatura)
+beta_t = 85.0                        # kg/t (consumo marginal)
+ruido = 0.04
+
+[fornos.FORNO-02]
+nome = "Forno de espera"
+tipo = "Forno de espera (manutenção do metal líquido)"
+funcao = "Espera"
+metal_liga = "Liga de alumínio"
+capacidade_nominal_kg = 800.0
+potencia_nominal_kg_h = 8.0
+temperatura_trabalho_c = 700.0
+dias_semana = [0, 1, 2, 3, 4]
+horas_dia = 18.0
+beta_h = 3.2
+beta_t = 10.0
+ruido = 0.04
+horas_domingo_sem_producao = 6.0     # mantido aquecido no domingo, sem carga
+
+[fornos.FORNO-03]
+nome = "Forno de tratamento térmico"
+tipo = "Forno de câmara"
+funcao = "Tratamento térmico"
+metal_liga = "Peças de alumínio"
+capacidade_nominal_kg = 1500.0
+potencia_nominal_kg_h = 25.0
+temperatura_trabalho_c = 530.0
+dias_semana = [1, 3]                 # terça e quinta
+carga_t_min = 0.8
+carga_t_max = 1.2
+horas_min = 9.0
+horas_max = 11.0
+beta_h = 4.0
+beta_t = 30.0
+ruido = 0.05
+
+[restaurante]
+refeicoes_media_util = 620
+refeicoes_dp_util = 25
+refeicoes_media_sabado = 180
+refeicoes_dp_sabado = 15
+beta_0 = 14.0                        # kg/dia (parcela fixa)
+beta_1 = 0.032                       # kg/refeição
+ruido = 0.05
+potencia_nominal_kg_h = 12.0
+# Distribuição do consumo e das refeições servidas ao longo do dia
+perfil_consumo = { 6 = 0.05, 7 = 0.09, 8 = 0.12, 9 = 0.15, 10 = 0.17, 11 = 0.16, 12 = 0.10, 13 = 0.05, 17 = 0.04, 18 = 0.05, 19 = 0.02 }
+perfil_refeicoes = { 11 = 0.35, 12 = 0.40, 13 = 0.10, 18 = 0.10, 19 = 0.05 }
+
+[chuveiros]
+usuarios_media_util = 130
+usuarios_dp_util = 8
+usuarios_sabado = 45
+usuarios_domingo = 10
+perfil_usuarios_util = { 6 = 0.30, 14 = 0.35, 15 = 0.10, 22 = 0.25 }
+perfil_usuarios_sabado = { 6 = 0.20, 14 = 0.80 }
+perfil_usuarios_domingo = { 6 = 1.0 }
+temp_entrada_media_c = 22.0
+temp_entrada_amplitude_c = 4.0       # mais quente em janeiro, mais fria em julho
+perda_espera_kg_h = 0.35             # aquecedor de acumulação
+ruido = 0.05
+potencia_nominal_kg_h = 6.0
+
+[reservatorio]
+# O estoque inicial vem de config/parametros.toml (reservatorio.estoque_inicial_kg)
+gatilho_abastecimento_pct = 35.0
+preco_inicial_r_kg = 7.00
+variacao_mensal_preco = 0.02
+erro_indicador_nivel_pct = 1.5
+
+# Intervenções simuladas (para demonstrar a análise antes/depois)
+[[intervencoes]]
+id = "INT-01"
+setor = "FUNDICAO"
+equipamento_id = "FORNO-01"
+descricao = "Ajuste da relação ar-combustível e troca da vedação da tampa"
+data_inicio = "2026-05-04"
+reducao = 0.08
+
+[[intervencoes]]
+id = "INT-02"
+setor = "CHUVEIROS"
+equipamento_id = "AQUECEDOR-01"
+descricao = "Isolamento térmico do reservatório de água quente"
+data_inicio = "2026-07-01"
+nova_perda_espera_kg_h = 0.22
+
+# Eventos anômalos inseridos de propósito (gabarito para testar a detecção)
+[[anomalias]]
+setor = "FUNDICAO"
+equipamento_id = "FORNO-01"
+inicio = "2026-01-20"
+fim = "2026-01-20"
+fator = 1.35
+descricao = "Consumo 35 % acima do modelo em um dia"
+
+[[anomalias]]
+setor = "RESTAURANTE"
+equipamento_id = "COZINHA"
+inicio = "2026-03-10"
+fim = "2026-03-12"
+fator = 1.40
+kg_hora_fora_expediente = 0.8
+descricao = "Consumo 40 % acima e queimador aceso após o expediente"
+
+[[anomalias]]
+setor = "CHUVEIROS"
+equipamento_id = "AQUECEDOR-01"
+inicio = "2026-08-15"
+fim = "2026-08-21"
+kg_hora_extra_madrugada = 1.2
+descricao = "Aquecedor em potência alta na madrugada durante uma semana"
