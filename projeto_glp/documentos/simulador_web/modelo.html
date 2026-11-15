@@ -1,0 +1,489 @@
+<title>Simulador de GLP Industrial</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: painel de engenharia em coluna única, seções ancoradas, dados em grade de cartões */
+:root {
+  --bg: #f6f7f8; --surface: #ffffff; --surface-2: #eef1f4; --line: #dfe3e8;
+  --fg: #12161b; --fg-2: #4b5560; --fg-3: #6f7a86;
+  --accent: #2a78d6; --accent-soft: #e3eefb;
+  --fund: #2a78d6; --rest: #eb6834; --chuv: #1baf7a; --neutro: #8a919a;
+  --warn-bg: #fff6df; --warn-fg: #7a5200; --warn-line: #f0d48a;
+  --good: #0a7d0a; --good-bg: #e5f5e5; --crit: #c23434; --crit-bg: #fbe9e9; --serio: #b25a1f; --serio-bg: #fdeee3;
+  --f-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111418; --surface: #191d22; --surface-2: #20262d; --line: #2c333b;
+  --fg: #eef1f4; --fg-2: #b7c0ca; --fg-3: #8b95a1;
+  --accent: #5a9ef0; --accent-soft: #1d2c3f;
+  --fund: #3987e5; --rest: #e0703f; --chuv: #22b07e; --neutro: #8f98a3;
+  --warn-bg: #2d2412; --warn-fg: #f3cf7a; --warn-line: #5a4721;
+  --good: #4cc24c; --good-bg: #16291a; --crit: #ef7a7a; --crit-bg: #331b1d; --serio: #f0a06a; --serio-bg: #33231a;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111418; --surface: #191d22; --surface-2: #20262d; --line: #2c333b;
+  --fg: #eef1f4; --fg-2: #b7c0ca; --fg-3: #8b95a1;
+  --accent: #5a9ef0; --accent-soft: #1d2c3f;
+  --fund: #3987e5; --rest: #e0703f; --chuv: #22b07e; --neutro: #8f98a3;
+  --warn-bg: #2d2412; --warn-fg: #f3cf7a; --warn-line: #5a4721;
+  --good: #4cc24c; --good-bg: #16291a; --crit: #ef7a7a; --crit-bg: #331b1d; --serio: #f0a06a; --serio-bg: #33231a;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 24px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(1.7rem, 3.6vw, 2.4rem); font-weight: 700; }
+h2 { font-size: 1.45rem; font-weight: 600; }
+h3 { font-size: 1.05rem; font-weight: 600; }
+p { margin: 0; max-width: 72ch; }
+.muted { color: var(--fg-2); }
+.small { font-size: 0.85rem; color: var(--fg-3); }
+.mono, .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.topo { display: grid; gap: 14px; margin-bottom: 18px; }
+.eyebrow { font-family: var(--f-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-3); }
+.faixa { display: flex; gap: 12px; align-items: flex-start; background: var(--warn-bg); color: var(--warn-fg);
+  border: 1px solid var(--warn-line); border-radius: var(--r); padding: 12px 14px; }
+.faixa strong { font-weight: 600; }
+.selo { flex: none; font-family: var(--f-mono); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em;
+  border: 1.5px solid currentColor; border-radius: 4px; padding: 2px 6px; margin-top: 2px; }
+
+nav.secoes { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  border-bottom: 1px solid var(--line); margin: 0 0 8px; padding-block: 8px; display: flex; gap: 6px; overflow-x: auto; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+nav.secoes a { white-space: nowrap; text-decoration: none; color: var(--fg-2); padding: 6px 10px; border-radius: 6px; font-size: 0.9rem; }
+nav.secoes a:hover { background: var(--surface-2); color: var(--fg); }
+.preco { margin-left: auto; display: flex; align-items: center; gap: 8px; white-space: nowrap; font-size: 0.85rem; color: var(--fg-2); }
+
+section { padding-top: 34px; display: grid; gap: 16px; scroll-margin-top: 60px; }
+.intro { display: grid; gap: 6px; }
+.grade { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.duas { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); }
+.duas > *, .grade > * { min-width: 0; }
+.cartao { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; display: grid; gap: 10px; align-content: start; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 4px; }
+.kpi .rot { font-size: 0.82rem; color: var(--fg-2); }
+.kpi .val { font-family: var(--f-mono); font-size: 1.6rem; font-weight: 500; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.kpi .det { font-size: 0.8rem; color: var(--fg-3); }
+.grafico { position: relative; height: 300px; }
+.grafico.alto { height: 340px; }
+
+.partic { display: grid; gap: 10px; }
+.partic .linha { display: grid; grid-template-columns: 96px 1fr 64px; gap: 10px; align-items: center; font-size: 0.9rem; }
+.trilho { height: 12px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
+.trilho span { display: block; height: 100%; border-radius: 6px; }
+
+.tabela { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-weight: 600; color: var(--fg-2); font-size: 0.8rem; }
+td.n, th.n { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+
+.controles { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: end; }
+label.campo { display: grid; gap: 4px; font-size: 0.82rem; color: var(--fg-2); }
+input, select { font: inherit; color: var(--fg); background: var(--surface); border: 1px solid var(--line); border-radius: 7px; padding: 7px 10px; min-width: 0; }
+input[type="number"] { width: 130px; font-family: var(--f-mono); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: inherit; font-size: 0.85rem; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg-2); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent-soft); color: var(--fg); border-color: var(--accent); }
+.estado { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+.estado.bom { background: var(--good-bg); color: var(--good); }
+.estado.critico { background: var(--crit-bg); color: var(--crit); }
+.estado.serio { background: var(--serio-bg); color: var(--serio); }
+.estado.atencao { background: var(--warn-bg); color: var(--warn-fg); }
+.hip { font-family: var(--f-mono); font-size: 0.85rem; background: var(--surface-2); border-radius: 8px; padding: 10px 12px; display: grid; gap: 4px; }
+.legenda { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.82rem; color: var(--fg-2); }
+.legenda i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.alertas { display: grid; gap: 8px; }
+.alerta { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 0.9rem; }
+.alerta .quando { color: var(--fg-3); font-size: 0.8rem; }
+footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--line); display: grid; gap: 8px; font-size: 0.88rem; color: var(--fg-2); }
+code { font-family: var(--f-mono); font-size: 0.85em; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+@media (max-width: 520px) { .partic .linha { grid-template-columns: 80px 1fr 56px; } .kpi .val { font-size: 1.35rem; } .preco { margin-left: 0; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; }
+</style>
+
+<div class="wrap">
+  <header class="topo">
+    <span class="eyebrow">CEUNSP · Engenharia Elétrica · Experimentação e Análise de Dados</span>
+    <h1>Simulador de consumo de GLP industrial</h1>
+    <p class="muted">Monitoramento, inferência estatística e simulação de economia para fundição, restaurante industrial e chuveiros. Os cálculos são os mesmos do sistema em Python do projeto.</p>
+    <div class="faixa" role="note">
+      <span class="selo">SIMULADO</span>
+      <p><strong>Dados de demonstração.</strong> Todos os números desta página vêm de dados sintéticos gerados com hipóteses explícitas, com uma intervenção e anomalias inseridas de propósito. Eles não descrevem nenhuma empresa e não servem para conclusões sobre consumo real.</p>
+    </div>
+  </header>
+
+  <nav class="secoes" aria-label="Seções">
+    <a href="#visao-geral">Visão geral</a>
+    <a href="#setores">Setores</a>
+    <a href="#antes-depois">Antes × depois</a>
+    <a href="#economia">Simulação de economia</a>
+    <a href="#reservatorio">Reservatório</a>
+    <a href="#alertas">Alertas</a>
+    <label class="preco" for="preco">Preço do GLP (R$/kg)
+      <input id="preco" type="number" min="0" step="0.1" value="7">
+    </label>
+  </nav>
+
+  <section id="visao-geral">
+    <div class="intro">
+      <h2>Visão geral</h2>
+      <p class="muted" id="periodo"></p>
+    </div>
+    <div class="grade" id="kpis"></div>
+    <div class="duas">
+      <div class="cartao">
+        <h3>Consumo mensal por setor</h3>
+        <div class="grafico"><canvas id="g-mensal" aria-label="Consumo mensal por setor, em kg"></canvas></div>
+      </div>
+      <div class="cartao">
+        <h3>Participação e consumo específico</h3>
+        <div class="partic" id="partic"></div>
+        <p class="small">Maior consumo absoluto não indica, sozinho, ineficiência. Cada setor é avaliado pelo consumo por unidade de atividade, comparado com o próprio histórico.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="setores">
+    <div class="intro">
+      <h2>Setores</h2>
+      <p class="muted">Indicadores normalizados pela atividade de cada setor.</p>
+    </div>
+    <div class="cartao">
+      <h3>Fundição — fornos</h3>
+      <div class="tabela"><table id="t-fornos"></table></div>
+      <div class="grafico"><canvas id="g-forno" aria-label="Consumo de GLP por tonelada no FORNO-01"></canvas></div>
+      <p class="small">FORNO-01: kg de GLP por tonelada fundida em cada dia de produção. A cor muda na data da intervenção simulada (ajuste de combustão e vedação da tampa). Eficiência térmica média estimada: <span id="eta" class="mono"></span>.</p>
+    </div>
+    <div class="duas">
+      <div class="cartao">
+        <h3>Restaurante — consumo × refeições</h3>
+        <div class="grafico"><canvas id="g-rest" aria-label="Consumo diário do restaurante em função das refeições"></canvas></div>
+        <p class="small" id="rest-modelo"></p>
+      </div>
+      <div class="cartao">
+        <h3>Chuveiros — perfil horário médio</h3>
+        <div class="grafico"><canvas id="g-chuv" aria-label="Consumo médio de GLP por hora nos chuveiros"></canvas></div>
+        <p class="small" id="chuv-texto"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="antes-depois">
+    <div class="intro">
+      <h2>Antes × depois: a intervenção reduziu o consumo?</h2>
+      <p class="muted">Teste de hipóteses unilateral com α = 0,05. O teste é escolhido pela normalidade (Shapiro-Wilk): t de Welch para dados normais, Mann-Whitney caso contrário.</p>
+    </div>
+    <div class="cartao">
+      <div class="controles">
+        <label class="campo" for="interv">Intervenção
+          <select id="interv"></select>
+        </label>
+        <div class="campo"><span>Janela antes e depois (dias)</span>
+          <div class="chips" id="janelas" role="group" aria-label="Janela antes e depois"></div>
+        </div>
+      </div>
+      <div class="hip" id="hipoteses"></div>
+      <div class="grade" id="kpis-teste"></div>
+      <div id="decisao"></div>
+      <div class="grafico"><canvas id="g-teste" aria-label="Série da métrica antes e depois da intervenção"></canvas></div>
+      <p class="small" id="ressalvas"></p>
+    </div>
+  </section>
+
+  <section id="economia">
+    <div class="intro">
+      <h2>Simulação de economia</h2>
+      <p class="muted">Quanto valeria reduzir o consumo em diferentes percentuais. São cenários simulados, não economias alcançadas: uma economia só é verificada com a comparação antes × depois.</p>
+    </div>
+    <div class="cartao">
+      <div class="controles">
+        <label class="campo" for="escopo">Escopo
+          <select id="escopo">
+            <option value="TOTAL">Empresa (total)</option>
+            <option value="FUNDICAO">Fundição</option>
+            <option value="RESTAURANTE">Restaurante</option>
+            <option value="CHUVEIROS">Chuveiros</option>
+          </select>
+        </label>
+        <label class="campo" for="consumo">Consumo atual (kg/dia)
+          <input id="consumo" type="number" min="0" step="1">
+        </label>
+        <label class="campo" for="dias-mes">Dias por mês
+          <input id="dias-mes" type="number" min="1" max="31" step="1">
+        </label>
+        <label class="campo" for="dias-ano">Dias por ano
+          <input id="dias-ano" type="number" min="1" max="366" step="1">
+        </label>
+        <label class="campo" for="invest">Investimento (R$, opcional)
+          <input id="invest" type="number" min="0" step="1000" value="0">
+        </label>
+      </div>
+      <div class="campo"><span class="small">Reduções simuladas</span>
+        <div class="chips" id="reducoes" role="group" aria-label="Reduções simuladas"></div>
+      </div>
+      <div class="grade" id="kpis-eco"></div>
+      <div class="duas">
+        <div class="grafico"><canvas id="g-eco" aria-label="Economia anual simulada por cenário"></canvas></div>
+        <div class="tabela"><table id="t-eco"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="reservatorio">
+    <div class="intro">
+      <h2>Reservatório (monitoramento virtual)</h2>
+      <p class="muted">Sem sensor de nível, o estoque é estimado por balanço de massa: estoque anterior + abastecimentos − consumo. Capacidade e limite de enchimento são hipóteses a confirmar com o fabricante e a distribuidora.</p>
+    </div>
+    <div class="grade" id="kpis-res"></div>
+    <div class="cartao">
+      <div class="grafico alto"><canvas id="g-res" aria-label="Estoque estimado de GLP no tanque"></canvas></div>
+    </div>
+  </section>
+
+  <section id="alertas">
+    <div class="intro">
+      <h2>Alertas de consumo fora do padrão</h2>
+      <p class="muted">Detectados pelos resíduos dos modelos de consumo (escore z robusto), por consumo fora do horário e por consumo sem produção. São indícios para investigação, não conclusões. Verificações em equipamentos de GLP cabem a profissionais habilitados.</p>
+    </div>
+    <div class="alertas" id="lista-alertas"></div>
+  </section>
+
+  <footer>
+    <p>Versão web do simulador, com resultados pré-calculados pelo sistema em Python. A versão completa (painel Streamlit com importação de dados reais) está no repositório do projeto: <a href="https://github.com/vitorhenriqueee22-crypto/Exercicios-Python-CEUNSP/tree/claude/glp-monitoring-system-lu8ml5/projeto_glp" target="_blank" rel="noopener">projeto_glp no GitHub</a>.</p>
+    <p>Energia: E = m · PCI, com PCI = 11.100 kcal/kg (ANP, 2026). O sistema apenas monitora e analisa; não envia comandos a equipamentos.</p>
+  </footer>
+</div>
+
+<script type="application/json" id="dados">__DADOS__</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById("dados").textContent);
+  const NOME = { FUNDICAO: "Fundição", RESTAURANTE: "Restaurante", CHUVEIROS: "Chuveiros" };
+  const COR = { FUNDICAO: "--fund", RESTAURANTE: "--rest", CHUVEIROS: "--chuv" };
+  const nf = (v, c = 0) => (v === null || v === undefined || !isFinite(v)) ? "—" :
+    v.toLocaleString("pt-BR", { minimumFractionDigits: c, maximumFractionDigits: c });
+  const reais = (v, c = 2) => "R$ " + nf(v, c);
+  const pval = p => p < 0.001 ? "< 0,001" : nf(p, 3);
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const $ = id => document.getElementById(id);
+  const graficos = {};
+  let preco = D.preco;
+
+  function kpi(rot, val, det) {
+    return `<div class="kpi"><span class="rot">${rot}</span><span class="val">${val}</span>${det ? `<span class="det">${det}</span>` : ""}</div>`;
+  }
+
+  function opcoesBase(eixoY, extra = {}) {
+    const fg2 = css("--fg-2"), linha = css("--line");
+    return Object.assign({
+      responsive: true, maintainAspectRatio: false, animation: false,
+      interaction: { mode: "nearest", intersect: false },
+      plugins: { legend: { labels: { color: fg2, boxWidth: 10, boxHeight: 10, font: { family: "IBM Plex Sans" } } },
+        tooltip: { callbacks: {} } },
+      scales: {
+        x: { ticks: { color: fg2, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 }, grid: { display: false }, border: { color: linha } },
+        y: { ticks: { color: fg2, callback: v => nf(v, 0) }, grid: { color: linha }, border: { display: false },
+             title: { display: !!eixoY, text: eixoY, color: fg2 } }
+      }
+    }, extra);
+  }
+  function grafico(id, cfg) {
+    if (graficos[id]) graficos[id].destroy();
+    if (typeof Chart === "undefined") { $(id).parentElement.innerHTML = '<p class="small">Gráfico indisponível: a biblioteca de gráficos não carregou.</p>'; return; }
+    graficos[id] = new Chart($(id), cfg);
+  }
+  const dataBR = s => s.slice(8, 10) + "/" + s.slice(5, 7) + "/" + s.slice(0, 4);
+  const mesBR = s => s.slice(5, 7) + "/" + s.slice(2, 4);
+
+  // ---------------------------------------------------------------- visão geral
+  function visaoGeral() {
+    $("periodo").textContent = `Período simulado: ${dataBR(D.periodo[0])} a ${dataBR(D.periodo[1])} (${D.dias} dias).`;
+    const total = D.total_kg;
+    $("kpis").innerHTML =
+      kpi("Consumo total", nf(total / 1000, 1) + " t", nf(total) + " kg") +
+      kpi("Custo total", reais(total * preco, 0), "consumo × preço informado") +
+      kpi("Energia", nf(total * D.pci_kwh_kg / 1000, 0) + " MWh", "E = m · PCI") +
+      kpi("Média diária", nf(total / D.dias, 0) + " kg/dia", "todos os setores");
+    const ordem = Object.keys(D.setores).sort((a, b) => D.setores[b].kg - D.setores[a].kg);
+    $("partic").innerHTML = ordem.map(s => {
+      const x = D.setores[s];
+      return `<div class="linha"><span>${NOME[s]}</span><div class="trilho"><span style="width:${x.pct}%;background:var(${COR[s]})"></span></div><span class="num">${nf(x.pct, 1)} %</span></div>
+        <div class="small" style="margin:-4px 0 4px 106px">${nf(x.kg)} kg · ${nf(x.ce, x.ce < 1 ? 3 : 1)} ${x.unidade}</div>`;
+    }).join("");
+    const ds = ["FUNDICAO", "RESTAURANTE", "CHUVEIROS"].filter(s => D.mensal.setores[s]).map(s => ({
+      label: NOME[s], data: D.mensal.setores[s], backgroundColor: css(COR[s]), borderColor: css("--surface"), borderWidth: 1, borderRadius: 2 }));
+    const op = opcoesBase("kg/mês");
+    op.scales.x.stacked = true; op.scales.y.stacked = true;
+    op.plugins.tooltip.callbacks.label = c => `${c.dataset.label}: ${nf(c.parsed.y)} kg`;
+    grafico("g-mensal", { type: "bar", data: { labels: D.mensal.rotulos, datasets: ds }, options: op });
+  }
+
+  // -------------------------------------------------------------------- setores
+  function setores() {
+    $("t-fornos").innerHTML = `<thead><tr><th>Forno</th><th>Função</th><th class="n">Consumo (kg)</th><th class="n">Metal (t)</th><th class="n">kg/h</th><th class="n">kg/t</th><th class="n">kg/ciclo</th><th class="n">R$/t</th><th class="n">Sem carga</th><th class="n">kg sem produção</th></tr></thead><tbody>` +
+      D.fornos.map(f => `<tr><td>${f.id} · ${f.nome}</td><td>${f.funcao}</td><td class="n">${nf(f.kg)}</td><td class="n">${nf(f.t, 1)}</td><td class="n">${nf(f.kg_h, 2)}</td><td class="n">${nf(f.kg_t, 1)}</td><td class="n">${nf(f.kg_ciclo, 1)}</td><td class="n">${nf(f.kg_t * preco, 0)}</td><td class="n">${nf(f.sem_carga, 1)} %</td><td class="n">${nf(f.kg_sem_prod)}</td></tr>`).join("") + "</tbody>";
+    $("eta").textContent = nf(D.eta_media, 1) + " % (hipotética: depende das propriedades da liga)";
+    const corte = D.intervencoes.find(i => i.id === "INT-01").inicio;
+    const pts = D.forno01.datas.map((d, i) => ({ x: d, y: D.forno01.kg_t[i] }));
+    const op = opcoesBase("kg/t");
+    op.scales.x.type = "category"; op.scales.x.ticks.callback = function (v) { const s = this.getLabelForValue(v); return mesBR(s); };
+    op.plugins.tooltip.callbacks.title = it => dataBR(it[0].label);
+    op.plugins.tooltip.callbacks.label = c => `${nf(c.parsed.y, 1)} kg/t`;
+    grafico("g-forno", { type: "line", data: { labels: D.forno01.datas, datasets: [
+      { label: "Antes da intervenção", data: pts.map(p => p.x < corte ? p.y : null), borderColor: css("--neutro"), borderWidth: 1.5, pointRadius: 0, spanGaps: false },
+      { label: "Depois da intervenção (" + dataBR(corte) + ")", data: pts.map(p => p.x >= corte ? p.y : null), borderColor: css("--fund"), borderWidth: 1.5, pointRadius: 0, spanGaps: false }
+    ] }, options: op });
+
+    const R = D.restaurante;
+    const xs = R.refeicoes, mn = Math.min(...xs), mx = Math.max(...xs);
+    const opR = opcoesBase("kg/dia");
+    opR.scales.x = { type: "linear", ticks: { color: css("--fg-2") }, grid: { display: false }, title: { display: true, text: "refeições no dia", color: css("--fg-2") } };
+    opR.plugins.tooltip.callbacks.label = c => `${nf(c.parsed.x)} refeições · ${nf(c.parsed.y, 1)} kg`;
+    grafico("g-rest", { type: "scatter", data: { datasets: [
+      { label: "Dias", data: xs.map((x, i) => ({ x, y: R.kg[i] })), backgroundColor: css("--rest"), pointRadius: 3.5 },
+      { label: "Linha de base G = β₀ + β₁·N", type: "line", data: [{ x: mn, y: R.b0 + R.b1 * mn }, { x: mx, y: R.b0 + R.b1 * mx }], borderColor: css("--fg"), borderWidth: 2, pointRadius: 0 }
+    ] }, options: opR });
+    $("rest-modelo").textContent = `Linha de base estimada: G = ${nf(R.b0, 2)} + ${nf(R.b1 * 1000, 1)} g × refeições (R² ajustado ${nf(R.r2aj, 3)}). A parcela fixa faz o consumo por refeição cair quando o volume sobe: em média ${nf(R.g_por_ref, 0)} g por refeição, ${nf(R.kg_dia, 1)} kg/dia.`;
+
+    const C = D.chuveiros;
+    const opC = opcoesBase("kg por hora");
+    opC.plugins.legend.display = false;
+    opC.plugins.tooltip.callbacks.title = it => it[0].label + "h";
+    opC.plugins.tooltip.callbacks.label = c => `${nf(c.parsed.y, 2)} kg · ${nf(C.perfil_usuarios[c.dataIndex], 0)} usuários`;
+    opC.scales.y.ticks.callback = v => nf(v, 1);
+    grafico("g-chuv", { type: "bar", data: { labels: [...Array(24).keys()].map(h => String(h).padStart(2, "0")),
+      datasets: [{ label: "kg/h", data: C.perfil_kg, backgroundColor: css("--chuv"), borderRadius: 2 }] }, options: opC });
+    $("chuv-texto").textContent = `Média de ${nf(C.kg_dia, 1)} kg/dia e ${nf(C.g_por_usuario)} g por usuário. ${nf(C.pct_sem_uso, 1)} % do GLP é consumido em horas sem usuários (perdas do reservatório). Correlação com a temperatura da água de entrada: r = ${nf(C.pearson_r, 2)}.`;
+  }
+
+  // ------------------------------------------------------------- antes × depois
+  let janela = "90";
+  function popularIntervencoes() {
+    $("interv").innerHTML = D.intervencoes.map((i, k) => `<option value="${k}">${i.id} — ${i.descricao} (${NOME[i.setor]}, ${dataBR(i.inicio)})</option>`).join("");
+    $("janelas").innerHTML = ["30", "60", "90", "120", "180"].map(j => `<button type="button" class="chip" data-j="${j}" aria-pressed="${j === janela}">${j}</button>`).join("");
+    $("janelas").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; janela = b.dataset.j;
+      [...$("janelas").children].forEach(x => x.setAttribute("aria-pressed", x.dataset.j === janela)); antesDepois(); });
+    $("interv").addEventListener("change", antesDepois);
+  }
+  function antesDepois() {
+    const I = D.intervencoes[+$("interv").value], R = I.janelas[janela];
+    $("hipoteses").innerHTML = `<span>Métrica: ${I.metrica}</span><span>H₀: a intervenção não reduz a média (μ_antes ≤ μ_depois)</span><span>H₁: a intervenção reduz a média (μ_antes &gt; μ_depois) · α = 0,05</span>`;
+    $("kpis-teste").innerHTML =
+      kpi("Média antes", nf(R.media_antes, 3), `n = ${R.n_antes}`) +
+      kpi("Média depois", nf(R.media_depois, 3), `n = ${R.n_depois}`) +
+      kpi("Redução média", nf(R.reducao_pct, 1) + " %", `IC 95 %: ${nf(R.ic[0], 1)} a ${nf(R.ic[1], 1)} %`) +
+      kpi("Valor p", pval(R.p), R.teste) +
+      kpi("Tamanho de efeito", nf(R.efeito, 2), "diferença em desvios-padrão");
+    const norm = Object.entries(R.normalidade).map(([k, v]) => `${k}: W = ${nf(v.w, 3)}, p = ${pval(v.p)} (${v.normal ? "normal" : "não normal"})`).join(" · ");
+    $("decisao").innerHTML = R.significativo
+      ? `<span class="estado bom">Rejeita H₀</span> <span class="muted">Há evidência estatística de redução. Shapiro-Wilk — ${norm}.</span>`
+      : `<span class="estado atencao">Não rejeita H₀</span> <span class="muted">Os dados não permitem afirmar que houve redução. Shapiro-Wilk — ${norm}.</span>`;
+    const ini = new Date(I.inicio), j = +janela, dia = 864e5;
+    const lab = [], antes = [], depois = [];
+    I.serie.datas.forEach((d, k) => { const t = new Date(d);
+      if (t >= ini - j * dia && t < +ini + j * dia) { lab.push(d); const v = I.serie.valores[k];
+        antes.push(t < ini ? v : null); depois.push(t >= ini ? v : null); } });
+    const mA = lab.map(d => new Date(d) < ini ? R.media_antes : null), mD = lab.map(d => new Date(d) >= ini ? R.media_depois : null);
+    const op = opcoesBase(I.metrica.split(" (")[0]);
+    op.scales.y.ticks.callback = v => nf(v, 1);
+    op.scales.x.ticks.callback = function (v) { return dataBR(this.getLabelForValue(v)).slice(0, 5); };
+    op.plugins.tooltip.callbacks.title = it => dataBR(it[0].label);
+    op.plugins.tooltip.callbacks.label = c => `${c.dataset.label}: ${nf(c.parsed.y, 2)}`;
+    grafico("g-teste", { type: "line", data: { labels: lab, datasets: [
+      { label: "Antes", data: antes, borderColor: css("--neutro"), borderWidth: 1.5, pointRadius: 0 },
+      { label: "Depois", data: depois, borderColor: css("--accent"), borderWidth: 1.5, pointRadius: 0 },
+      { label: "Média antes", data: mA, borderColor: css("--fg-2"), borderWidth: 2, borderDash: [], pointRadius: 0 },
+      { label: "Média depois", data: mD, borderColor: css("--fg"), borderWidth: 2, pointRadius: 0 }
+    ] }, options: op });
+    $("ressalvas").textContent = "Períodos antes e depois são amostras independentes: confirme que produção, mix e estação são comparáveis antes de atribuir a diferença à intervenção. Séries diárias podem ser autocorrelacionadas, o que torna o valor p otimista.";
+  }
+
+  // ------------------------------------------------------------------- economia
+  const REDUCOES = [3, 5, 8, 10, 15, 20, 25];
+  let escolhidas = new Set([3, 5, 8, 10, 15]);
+  function preparaEconomia() {
+    $("dias-mes").value = D.dias_mes; $("dias-ano").value = D.dias_ano;
+    $("consumo").value = D.escopos.TOTAL.kg_dia;
+    $("reducoes").innerHTML = REDUCOES.map(r => `<button type="button" class="chip" data-r="${r}" aria-pressed="${escolhidas.has(r)}">${r} %</button>`).join("");
+    $("reducoes").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; const r = +b.dataset.r;
+      if (escolhidas.has(r)) { if (escolhidas.size > 1) escolhidas.delete(r); } else escolhidas.add(r);
+      [...$("reducoes").children].forEach(x => x.setAttribute("aria-pressed", escolhidas.has(+x.dataset.r))); economia(); });
+    $("escopo").addEventListener("change", () => { $("consumo").value = D.escopos[$("escopo").value].kg_dia; economia(); });
+    ["consumo", "dias-mes", "dias-ano", "invest"].forEach(id => $(id).addEventListener("input", economia));
+  }
+  function economia() {
+    const g = Math.max(+$("consumo").value || 0, 0), dm = Math.max(+$("dias-mes").value || 0, 0), da = Math.max(+$("dias-ano").value || 0, 0);
+    const inv = Math.max(+$("invest").value || 0, 0), esc = D.escopos[$("escopo").value];
+    const linhas = [...escolhidas].sort((a, b) => a - b).map(r => { const kg = g * r / 100;
+      return { r, kg, kgAno: kg * da, dia: kg * preco, mes: kg * preco * dm, ano: kg * preco * da,
+               ce: esc.atividade ? (g - kg) / esc.atividade : null, payback: inv > 0 && kg * preco * dm > 0 ? inv / (kg * preco * dm) : null }; });
+    const m = linhas[linhas.length - 1];
+    $("kpis-eco").innerHTML =
+      kpi(`GLP poupado com ${m.r} %`, nf(m.kgAno) + " kg/ano", nf(m.kg, 1) + " kg por dia de operação") +
+      kpi("Economia mensal", reais(m.mes, 0), `${dm} dias de operação`) +
+      kpi("Economia anual", reais(m.ano, 0), `${da} dias de operação`) +
+      kpi(inv > 0 ? "Retorno simples" : "Consumo otimizado", inv > 0 ? nf(m.payback, 1) + " meses" : nf(g - m.kg, 1) + " kg/dia",
+          inv > 0 ? "investimento / economia mensal" : (esc.atividade ? `${nf(m.ce, esc.atividade > 50 ? 4 : 1)} kg por ${esc.unidade.split("/")[0]}` : "empresa toda"));
+    $("t-eco").innerHTML = `<thead><tr><th>Redução</th><th class="n">kg/dia</th><th class="n">kg/ano</th><th class="n">R$/mês</th><th class="n">R$/ano</th>${inv > 0 ? '<th class="n">Retorno</th>' : ""}</tr></thead><tbody>` +
+      linhas.map(l => `<tr><td>${l.r} %</td><td class="n">${nf(l.kg, 1)}</td><td class="n">${nf(l.kgAno)}</td><td class="n">${nf(l.mes, 0)}</td><td class="n">${nf(l.ano, 0)}</td>${inv > 0 ? `<td class="n">${nf(l.payback, 1)} meses</td>` : ""}</tr>`).join("") +
+      `</tbody><caption class="small" style="caption-side:bottom;text-align:left;padding-top:8px">Classificação: SIMULAÇÃO. ΔG = G·r; economia = ΔG · preço · dias.</caption>`;
+    const op = opcoesBase("R$/ano");
+    op.plugins.legend.display = false;
+    op.plugins.tooltip.callbacks.label = c => reais(c.parsed.y, 0) + " por ano";
+    grafico("g-eco", { type: "bar", data: { labels: linhas.map(l => l.r + " %"), datasets: [{ data: linhas.map(l => l.ano), backgroundColor: css("--accent"), borderRadius: 3 }] }, options: op });
+  }
+
+  // ---------------------------------------------------------------- reservatório
+  function reservatorio() {
+    const R = D.reservatorio, n = R.estoque.length, ult = R.estoque[n - 1];
+    const aut = Math.max(ult - R.reserva, 0) / R.media30;
+    const ultAb = R.abastecimentos[R.abastecimentos.length - 1];
+    $("kpis-res").innerHTML =
+      kpi("Estoque estimado", nf(ult) + " kg", "em " + dataBR(R.datas[n - 1])) +
+      kpi("Nível estimado", nf(ult / R.capacidade * 100, 0) + " %", "da capacidade nominal (hipótese: " + nf(R.capacidade) + " kg)") +
+      kpi("Autonomia", nf(aut, 1) + " dias", "(estoque − reserva) / média de 30 dias") +
+      kpi("Último abastecimento", nf(ultAb.kg) + " kg", dataBR(ultAb.data) + " · " + reais(ultAb.preco) + "/kg");
+    const lim = R.capacidade * R.fracao_max, al = R.capacidade * R.alerta_pct / 100;
+    const const_ = v => R.datas.map(() => v);
+    const op = opcoesBase("kg de GLP");
+    op.scales.x.ticks.callback = function (v) { return mesBR(this.getLabelForValue(v)); };
+    op.plugins.tooltip.callbacks.title = it => dataBR(it[0].label);
+    op.plugins.tooltip.callbacks.label = c => `${c.dataset.label}: ${nf(c.parsed.y)} kg`;
+    grafico("g-res", { type: "line", data: { labels: R.datas, datasets: [
+      { label: "Estoque estimado", data: R.estoque, borderColor: css("--accent"), borderWidth: 2, pointRadius: 0 },
+      { label: "Limite de enchimento (hipótese)", data: const_(lim), borderColor: css("--fg-3"), borderWidth: 1, pointRadius: 0 },
+      { label: "Nível de alerta", data: const_(al), borderColor: css("--serio"), borderWidth: 1, pointRadius: 0 },
+      { label: "Reserva mínima", data: const_(R.reserva), borderColor: css("--crit"), borderWidth: 1, pointRadius: 0 }
+    ] }, options: op });
+  }
+
+  // --------------------------------------------------------------------- alertas
+  function listaAlertas() {
+    const rot = { critico: "Crítico", serio: "Sério", atencao: "Atenção" };
+    $("lista-alertas").innerHTML = D.alertas.map(a => `<div class="alerta"><span class="estado ${a.nivel}">${rot[a.nivel] || a.nivel}</span>
+      <div><div>${a.setor} — ${a.mensagem}</div><div class="quando">${a.data}</div></div></div>`).join("") ||
+      '<p class="muted">Nenhum alerta no período.</p>';
+  }
+
+  function tudo() { visaoGeral(); setores(); antesDepois(); economia(); reservatorio(); }
+  $("preco").value = D.preco;
+  $("preco").addEventListener("input", () => { preco = Math.max(+$("preco").value || 0, 0); visaoGeral(); setores(); economia(); });
+  popularIntervencoes(); preparaEconomia(); listaAlertas(); tudo();
+  // Redesenha os gráficos quando o tema muda
+  const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  if (mq.addEventListener) mq.addEventListener("change", tudo);
+  new MutationObserver(tudo).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+})();
+</script>

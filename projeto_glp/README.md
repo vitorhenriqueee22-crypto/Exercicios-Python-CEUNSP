@@ -33,6 +33,12 @@ O sistema mede, analisa e recomenda. **Não envia comandos** a reguladores, vál
 | **Trabalho escrito da proposta** — [`Proposta_Projeto_GLP_ABNT.docx`](documentos/Proposta_Projeto_GLP_ABNT.docx) ([PDF](documentos/Proposta_Projeto_GLP_ABNT.pdf)) | Entregável da disciplina, na estrutura pedida: Resumo, Contexto e Problema de Engenharia, Formulação das Hipóteses Estatísticas, Metodologia de Inferência Estatística e Referências (27 páginas) |
 | Relatório técnico do sistema — [`Relatorio_Projeto_GLP_ABNT.docx`](documentos/Relatorio_Projeto_GLP_ABNT.docx) ([PDF](documentos/Relatorio_Projeto_GLP_ABNT.pdf)) | Material de apoio: pesquisa, diagnóstico, arquitetura, desenvolvimento, testes e validação (61 páginas) |
 
+## Simulador web (versão estática)
+
+Uma versão web do simulador, com os resultados pré-calculados pelo sistema a partir dos dados simulados, fica em
+[`documentos/simulador_web/simulador_glp.html`](documentos/simulador_web/simulador_glp.html) (abre direto no navegador).
+Para refazê-la depois de mudar as hipóteses: `python documentos/simulador_web/gerar_simulador_web.py`.
+
 ## Instalação
 
 Requer Python 3.11 ou mais recente.
