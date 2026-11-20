@@ -1,0 +1,6 @@
+equipamento_id,nome,setor,tipo,funcao,metal_liga,capacidade_nominal_kg,potencia_nominal_kg_h,temperatura_trabalho_c,medicao_individual,origem
+FORNO-01,Forno cadinho basculante 1,FUNDICAO,Cadinho basculante,Fusão,Liga de alumínio,500.0,35.0,720.0,sim,SIMULADO
+FORNO-02,Forno de espera,FUNDICAO,Forno de espera (manutenção do metal líquido),Espera,Liga de alumínio,800.0,8.0,700.0,sim,SIMULADO
+FORNO-03,Forno de tratamento térmico,FUNDICAO,Forno de câmara,Tratamento térmico,Peças de alumínio,1500.0,25.0,530.0,sim,SIMULADO
+COZINHA,Cozinha industrial (medidor do setor),RESTAURANTE,"Conjunto de fogões, fornos e caldeirões",Cocção,,,12.0,,não (medidor do setor),SIMULADO
+AQUECEDOR-01,Aquecedor de acumulação,CHUVEIROS,Aquecedor de água a gás de acumulação,Aquecimento de água,,,6.0,40.0,sim,SIMULADO

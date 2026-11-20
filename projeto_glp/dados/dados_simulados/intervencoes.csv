@@ -1,0 +1,3 @@
+id,setor,equipamento_id,descricao,data_inicio,origem
+INT-01,FUNDICAO,FORNO-01,Ajuste da relação ar-combustível e troca da vedação da tampa (SIMULADO),2026-05-04,SIMULADO
+INT-02,CHUVEIROS,AQUECEDOR-01,Isolamento térmico do reservatório de água quente (SIMULADO),2026-07-01,SIMULADO
