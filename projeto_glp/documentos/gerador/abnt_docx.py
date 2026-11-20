@@ -197,6 +197,7 @@ class Metadados:
     keywords: list[str]
     siglas: list[tuple[str, str]]
     simbolos: list[tuple[str, str]]
+    rotulo_orientador: str = "Orientador(a)"
 
 
 # ---------------------------------------------------------------------------
@@ -531,7 +532,7 @@ class DocumentoABNT:
         self._par(m.subtitulo, entrelinha=1.5)
         self._par(m.natureza, alinhamento=WD_ALIGN_PARAGRAPH.JUSTIFY, antes=60,
                   recuo_esq=LARGURA_TEXTO_CM / 2)
-        self._par(f"Orientador(a): {m.orientador}", alinhamento=WD_ALIGN_PARAGRAPH.LEFT,
+        self._par(f"{m.rotulo_orientador}: {m.orientador}", alinhamento=WD_ALIGN_PARAGRAPH.LEFT,
                   antes=12, recuo_esq=LARGURA_TEXTO_CM / 2)
         self._par(m.local, negrito=True, antes=200)
         self._par(m.ano, negrito=True)

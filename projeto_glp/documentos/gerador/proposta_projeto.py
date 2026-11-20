@@ -43,11 +43,13 @@ FIGURA_PAINEL = PASTA_DOCUMENTOS / "figuras" / "painel_estatistica_antes_depois.
 # Identificação (completar; não inventar nomes de integrantes)
 INTEGRANTES = ["Vitor Henrique Santos Das Virgens"]   # até 4 integrantes
 CIDADE = "[Cidade]"
-ORIENTADOR = "[Nome do(a) professor(a) da disciplina]"
+ORIENTADOR = "[Nome da professora da disciplina]"
+ROTULO_ORIENTADOR = "Professora"
 DATA_ACESSO = "13 nov. 2026"
 REPOSITORIO = "https://github.com/vitorhenriqueee22-crypto/Exercicios-Python-CEUNSP"
-FONTE_AUTOR = "elaborado pelo autor (2026)."
-FONTE_SIM = "elaborado pelo autor (2026), com dados SIMULADOS."
+_AUTORIA = "pelos autores" if len(INTEGRANTES) > 1 else "pelo autor"
+FONTE_AUTOR = f"elaborado {_AUTORIA} (2026)."
+FONTE_SIM = f"elaborado {_AUTORIA} (2026), com dados SIMULADOS."
 
 
 def fmt(valor: float, casas: int = 2) -> str:
@@ -97,7 +99,13 @@ def demonstracao() -> dict:
     # Restaurante — linha de base G = β0 + β1·N e teste de β1
     dr = restaurante.diario(reg, preco)
     modelo_r = restaurante.modelo_consumo(dr)
-    return {"hip": hip, "par": par, "r1": r1, "r2": r2, "n_ind": n_ind, "n_par": n_par,
+    x = np.asarray(antes1, dtype=float)
+    contagem, bordas = np.histogram(x, bins=np.arange(np.floor(x.min() / 5) * 5, x.max() + 5, 5))
+    k_modal = int(contagem.argmax())
+    desc = {"n": len(x), "media": x.mean(), "mediana": float(np.median(x)), "var": x.var(ddof=1),
+            "dp": x.std(ddof=1), "cv": x.std(ddof=1) / x.mean() * 100, "ep": x.std(ddof=1) / np.sqrt(len(x)),
+            "amp": x.max() - x.min(), "modal": (bordas[k_modal], bordas[k_modal + 1], int(contagem[k_modal]))}
+    return {"hip": hip, "par": par, "r1": r1, "r2": r2, "n_ind": n_ind, "n_par": n_par, "desc": desc,
             "dp_antes": antes1.std(ddof=1), "media_antes": antes1.mean(), "t_dia": t_dia,
             "economia": economia, "corr": corr, "modelo_r": modelo_r, "n_registros": len(reg),
             "preco": preco, "dias_ano": dias_ano}
@@ -163,6 +171,7 @@ META = Metadados(
         "proposta de projeto de otimização de processos baseada em inferência estatística."
     ),
     orientador=ORIENTADOR,
+    rotulo_orientador=ROTULO_ORIENTADOR,
     local=CIDADE,
     ano="2026",
     resumo=RESUMO,
@@ -190,13 +199,21 @@ META = Metadados(
     ],
     simbolos=[
         ("A", "atividade no período (t, refeições ou usuários)"),
-        ("d", "diferença antes − depois"),
+        ("CV", "coeficiente de variação"),
+        ("d_{i}", "diferença antes − depois do par i"),
         ("d̄", "média das diferenças"),
+        ("d, d_{z}", "tamanho de efeito (amostras independentes e pareadas)"),
+        ("EP", "erro padrão da média"),
         ("G", "consumo de GLP, em kg"),
         ("H_{0}, H_{1}", "hipóteses nula e alternativa"),
+        ("Md", "mediana"),
+        ("Mo", "moda"),
         ("n", "tamanho da amostra"),
-        ("p", "preço do GLP, em R$/kg"),
-        ("s", "desvio-padrão amostral"),
+        ("p", "valor p do teste de hipóteses"),
+        ("P", "preço do GLP, em R$/kg"),
+        ("R%", "redução percentual"),
+        ("s, s²", "desvio-padrão e variância amostrais"),
+        ("x̄", "média amostral"),
         ("α", "nível de significância (probabilidade de erro tipo I)"),
         ("β", "probabilidade de erro tipo II; coeficiente de regressão, conforme o contexto"),
         ("δ", "menor redução de interesse prático"),
@@ -489,28 +506,53 @@ def montar() -> Conteudo:
     c.p(
         "Na aplicação demonstrativa (seção 3.9), com os dados simulados do forno de fusão, o "
         f"desvio-padrão do consumo específico no período anterior foi de {fmt(DEMO['dp_antes'], 2)} "
-        f"kg/t, para média de {fmt(DEMO['media_antes'], 1)} kg/t. Para detectar δ = 3 % da média, "
+        f"kg/t, para média de {fmt(DEMO['media_antes'], 2)} kg/t. Para detectar δ = 3 % da média, "
         f"seriam necessários cerca de {DEMO['n_ind']} dias de operação em cada período com amostras "
         f"independentes; com pareamento perfeito e o mesmo desvio, cerca de {DEMO['n_par']}. "
         "Esses números são SIMULADOS e servem apenas para ilustrar o cálculo."
     )
     c.h2("3.4", "ESTATÍSTICA DESCRITIVA")
     c.p(
-        "Antes dos testes, cada série é descrita por média, mediana, desvio-padrão, variância, "
-        "mínimo, máximo, quartis e coeficiente de variação (Equações 6 a 8), além de "
-        "histogramas, diagramas de caixa e séries temporais com média móvel, que revelam "
-        "tendências, sazonalidade e valores atípicos (Montgomery; Runger, 2018)."
+        "Antes dos testes, cada série é descrita por medidas de tendência central e de "
+        "dispersão, além de histogramas, diagramas de caixa e séries temporais com média "
+        "móvel, que revelam tendências, sazonalidade e valores atípicos (Montgomery; Runger, "
+        "2018). As medidas de tendência central são a média aritmética (Equação 6), a mediana "
+        "(Equação 7), que é o valor central dos dados ordenados x_{(1)} ≤ x_{(2)} ≤ … ≤ x_{(n)} e "
+        "é pouco afetada por valores extremos, e a moda (Mo), que é o valor de maior frequência; "
+        "em dados contínuos, como o consumo específico, usa-se a classe de maior frequência do "
+        "histograma (classe modal)."
     )
     c.eq("x̄ = (Σ x_{i}) / n")
-    c.eq("s = √[Σ (x_{i} − x̄)² / (n − 1)]")
+    c.eq("Md = x_{((n+1)/2)}, se n é ímpar;   Md = [x_{(n/2)} + x_{(n/2+1)}] / 2, se n é par")
+    c.p(
+        "A dispersão, que representa a variação natural do consumo de um dia para outro, é "
+        "medida pela amplitude (A = x_{máx} − x_{mín}), pela variância amostral (Equação 8), "
+        "pelo desvio-padrão (Equação 9), pelo coeficiente de variação (Equação 10), que permite "
+        "comparar setores com unidades diferentes, e pelo erro padrão da média (Equação 11), "
+        "que mede a incerteza da média e diminui com o tamanho da amostra:"
+    )
+    c.eq("s² = Σ (x_{i} − x̄)² / (n − 1)")
+    c.eq("s = √s²")
     c.eq("CV = (s / x̄) · 100 %")
+    c.eq("EP = s / √n")
+    ds = DEMO["desc"]
+    c.p(
+        f"Nos dados SIMULADOS do forno de fusão, nos 90 dias anteriores à intervenção (n = "
+        f"{ds['n']} dias com produção), obtêm-se x̄ = {fmt(ds['media'], 2)} kg/t, Md = "
+        f"{fmt(ds['mediana'], 2)} kg/t, classe modal de {fmt(ds['modal'][0], 0)} a "
+        f"{fmt(ds['modal'][1], 0)} kg/t ({ds['modal'][2]} dias), A = {fmt(ds['amp'], 2)} kg/t, "
+        f"s² = {fmt(ds['var'], 2)} (kg/t)², s = {fmt(ds['dp'], 2)} kg/t, CV = {fmt(ds['cv'], 1)} % "
+        f"e EP = {fmt(ds['ep'], 2)} kg/t. A proximidade entre média e mediana é coerente com uma "
+        "distribuição aproximadamente simétrica, o que é confirmado pelo teste de normalidade "
+        "da seção 3.5."
+    )
     c.h2("3.5", "VERIFICAÇÃO DOS PRESSUPOSTOS")
     c.p(
         "A normalidade é verificada pelo teste de Shapiro-Wilk (Shapiro; Wilk, 1965) e pelo "
         "gráfico quantil-quantil. No teste pareado, verifica-se a normalidade das diferenças, e "
         "não das amostras. O teste é usado como diagnóstico: com amostras pequenas tem pouco "
         "poder e com amostras grandes rejeita desvios sem importância prática. A independência "
-        "é avaliada pela estatística de Durbin-Watson dos resíduos (Equação 9), cujo valor "
+        "é avaliada pela estatística de Durbin-Watson dos resíduos (Equação 12), cujo valor "
         "próximo de 2 indica ausência de autocorrelação (Durbin; Watson, 1950). Séries diárias "
         "de consumo costumam ser autocorrelacionadas; nesse caso, os dados são agregados por "
         "semana ou a comparação é feita contra a linha de base. A igualdade de variâncias não é "
@@ -523,23 +565,25 @@ def montar() -> Conteudo:
         "Escolha do teste de hipóteses",
         ["Estrutura dos dados", "Normalidade", "Teste", "Referência"],
         [
-            ["Pareados", "Diferenças aproximadamente normais", "t pareado (Equação 10)", "Student (1908)"],
+            ["Pareados", "Diferenças aproximadamente normais", "t pareado (Equação 13)", "Student (1908)"],
             ["Pareados", "Diferenças não normais", "Wilcoxon dos postos sinalizados", "Wilcoxon (1945)"],
-            ["Independentes", "Ambas as amostras aproximadamente normais", "t de Welch (Equações 11 e 12)", "Welch (1947)"],
+            ["Independentes", "Ambas as amostras aproximadamente normais", "t de Welch (Equações 14 e 15)", "Welch (1947)"],
             ["Independentes", "Alguma amostra não normal", "Mann-Whitney", "Mann e Whitney (1947)"],
             ["Resíduos em relação à linha de base", "Resíduos aproximadamente normais", "t para uma amostra", "Montgomery e Runger (2018)"],
         ],
         [4.2, 4.6, 4.2, 3.0],
         FONTE_AUTOR,
     )
-    c.p("O teste t pareado usa a estatística da Equação 10, com n − 1 graus de liberdade:")
+    c.p("O teste t pareado usa a estatística da Equação 13, com n − 1 graus de liberdade:")
     c.eq("t = d̄ / (s_{d} / √n)")
     c.p(
         "Para amostras independentes, o teste de Welch não supõe variâncias iguais (Welch, "
-        "1947); os graus de liberdade são aproximados pela Equação 12 (Satterthwaite, 1946):"
+        "1947); a estatística é a da Equação 14, e os graus de liberdade são aproximados pela "
+        "Equação 15 (Satterthwaite, 1946), em que o índice 1 indica o período antes e o índice 2, "
+        "o período depois da intervenção:"
     )
-    c.eq("t_{W} = (x̄_{antes} − x̄_{depois}) / √(s_{antes}²/n_{antes} + s_{depois}²/n_{depois})")
-    c.eq("ν = (s_{a}²/n_{a} + s_{d}²/n_{d})² / [(s_{a}²/n_{a})²/(n_{a} − 1) + (s_{d}²/n_{d})²/(n_{d} − 1)]")
+    c.eq("t_{W} = (x̄_{1} − x̄_{2}) / √(s_{1}²/n_{1} + s_{2}²/n_{2})")
+    c.eq("ν = (s_{1}²/n_{1} + s_{2}²/n_{2})² / [(s_{1}²/n_{1})²/(n_{1} − 1) + (s_{2}²/n_{2})²/(n_{2} − 1)]")
     c.p(
         "Os testes de Wilcoxon e de Mann-Whitney comparam postos em vez de valores, e por isso "
         "são robustos a assimetrias e valores extremos (Wilcoxon, 1945; Mann; Whitney, 1947). Em "
@@ -548,12 +592,22 @@ def montar() -> Conteudo:
     )
     c.h2("3.7", "INTERVALOS DE CONFIANÇA, TAMANHO DE EFEITO E LINHA DE BASE")
     c.p(
-        "O intervalo de confiança de 95 % da redução média (Equação 13) mostra a faixa de "
-        "valores compatíveis com os dados, e o tamanho de efeito (Equação 14) expressa a redução "
-        "em desvios-padrão (Cohen, 1988):"
+        "O intervalo de confiança de 95 % da redução média mostra a faixa de valores "
+        "compatíveis com os dados. Para dados pareados, usa-se a Equação 16; para amostras "
+        "independentes, a Equação 17, com os graus de liberdade da Equação 15. Dividindo-se a "
+        "redução e os limites do intervalo pela média do período anterior, obtêm-se a redução "
+        "percentual (Equação 18) e o seu intervalo de confiança:"
     )
     c.eq("IC_{95%} = d̄ ± t_{0,975; n−1} · s_{d} / √n")
+    c.eq("IC_{95%} = (x̄_{1} − x̄_{2}) ± t_{0,975; ν} · √(s_{1}²/n_{1} + s_{2}²/n_{2})")
+    c.eq("R% = [(x̄_{1} − x̄_{2}) / x̄_{1}] · 100 %")
+    c.p(
+        "O tamanho de efeito expressa a redução em desvios-padrão (Cohen, 1988): Equação 19 "
+        "para dados pareados e Equação 20 para amostras independentes, em que se usa a média "
+        "das variâncias dos dois períodos:"
+    )
     c.eq("d_{z} = d̄ / s_{d}")
+    c.eq("d = (x̄_{1} − x̄_{2}) / √[(s_{1}² + s_{2}²) / 2]")
     c.p(
         "Quando a atividade muda entre os períodos, ajusta-se por mínimos quadrados ordinários "
         "um modelo de linha de base com os dados do período anterior à intervenção (Equação 4 "
@@ -561,7 +615,7 @@ def montar() -> Conteudo:
         "de cada coeficiente é testada por t = β̂ / EP(β̂), e a qualidade do ajuste é avaliada "
         "pelo R² ajustado e pela análise de resíduos. Depois da intervenção, o modelo prevê o "
         "consumo que teria ocorrido sem ela, e a economia verificada é calculada pela Equação "
-        "15, conforme o PIMVP (EVO, 2012). A soma acumulada dos resíduos (CUSUM) mostra a partir "
+        "21, conforme o PIMVP (EVO, 2012). A soma acumulada dos resíduos (CUSUM) mostra a partir "
         "de quando o desempenho mudou (Page, 1954)."
     )
     c.eq("Economia = Σ (Ĝ_{linha de base} − G_{medido})")
@@ -569,15 +623,15 @@ def montar() -> Conteudo:
     c.p(
         "A economia financeira anual é estimada a partir da redução média do consumo "
         "específico e dos seus limites de confiança, multiplicados pela atividade, pelo preço e "
-        "pelos dias de operação (Equação 16). Assim, a empresa recebe não apenas um valor de "
+        "pelos dias de operação (Equação 22). Assim, a empresa recebe não apenas um valor de "
         "economia, mas a faixa plausível desse valor, que pode ser comparada com o custo da "
         "intervenção."
     )
-    c.eq("ΔC_{ano} = Δ̄CE · Ā_{dia} · p · D_{ano}")
+    c.eq("ΔC_{ano} = Δ̄CE · Ā_{dia} · P · D_{ano}")
     c.definicoes([
         ("Δ̄CE", "redução média do consumo específico (e seus limites do IC 95 %)"),
         ("Ā_{dia}", "atividade média diária (por exemplo, toneladas fundidas por dia)"),
-        ("p", "preço do GLP, em R$/kg, conforme nota fiscal"),
+        ("P", "preço do GLP, em R$/kg, conforme nota fiscal"),
         ("D_{ano}", "dias de operação por ano"),
     ])
     c.h2("3.9", "IMPLEMENTAÇÃO E APLICAÇÃO DEMONSTRATIVA")
@@ -607,7 +661,7 @@ def montar() -> Conteudo:
         "Aplicação demonstrativa com dados simulados",
         ["Hipótese", "Média antes", "Média depois", "Redução (IC 95 %)", "Teste", "Valor p", "Decisão"],
         [
-            ["Fundição: kg/t", fmt(R1.media_antes, 1), fmt(R1.media_depois, 1),
+            ["Fundição: kg/t", fmt(R1.media_antes, 2), fmt(R1.media_depois, 2),
              f"{fmt(R1.reducao_percentual, 1)} % ({fmt(R1.ic95_reducao_percentual[0], 1)} a {fmt(R1.ic95_reducao_percentual[1], 1)} %)",
              R1.teste, fmt_p(R1.p_valor), "Rejeita H₀" if R1.significativo else "Não rejeita H₀"],
             ["Chuveiros: kg/dia sem uso", fmt(R2.media_antes, 2), fmt(R2.media_depois, 2),
@@ -640,14 +694,16 @@ def montar() -> Conteudo:
            "estatisticamente comprovada e economicamente relevante."
            if relevante else "; pela regra da seção 2.4, a redução não seria considerada "
            "economicamente relevante.")
-        + f" O tamanho de efeito foi d = {fmt(R1.tamanho_efeito, 2)}. "
+        + f" A redução percentual foi ({fmt(R1.media_antes, 2)} − {fmt(R1.media_depois, 2)}) / "
+        f"{fmt(R1.media_antes, 2)} = {fmt(R1.reducao_percentual, 1)} % (Equação 18), e o tamanho "
+        f"de efeito foi d = {fmt(R1.tamanho_efeito, 2)} (Equação 20). "
         + frase_normalidade(R2, "Nos chuveiros")
     )
     e_inf, e_med, e_sup = DEMO["economia"]
     mr = DEMO["modelo_r"]
     corr = DEMO["corr"]
     c.p(
-        f"Aplicando a Equação 16 com {fmt(DEMO['t_dia'], 2)} t/dia, preço de R$ "
+        f"Aplicando a Equação 22 com {fmt(DEMO['t_dia'], 2)} t/dia, preço de R$ "
         f"{fmt(DEMO['preco'], 2)}/kg e {DEMO['dias_ano']} dias por ano (valores HIPOTÉTICOS), a "
         f"economia anual do forno seria de R$ {fmt(e_med, 0)}, com faixa de R$ {fmt(e_inf, 0)} a "
         f"R$ {fmt(e_sup, 0)}. No restaurante, a linha de base estimou parcela fixa de "
