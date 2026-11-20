@@ -43,12 +43,12 @@ FIGURA_PAINEL = PASTA_DOCUMENTOS / "figuras" / "painel_estatistica_antes_depois.
 # Identificação (completar; não inventar nomes de integrantes)
 INTEGRANTES = [   # até 4 integrantes, com RGM
     "Vitor Henrique Santos Das Virgens – RGM 48303577",
-    "Sergio Junior – RGM 50097237",
+    "Sérgio Júnior – RGM 50097237",
     "Raul Amaral – RGM 5049502000",
-    "Luis Henrique – RGM 046624929",
+    "Luís Henrique – RGM 046624929",
 ]
 CIDADE = "Salto"
-ORIENTADOR = "Vanessa Silva Pereira Araujo"
+ORIENTADOR = "Vanessa Silva Pereira Araújo"
 ROTULO_ORIENTADOR = "Professora"
 DATA_ACESSO = "13 nov. 2026"
 REPOSITORIO = "https://github.com/vitorhenriqueee22-crypto/Exercicios-Python-CEUNSP"
