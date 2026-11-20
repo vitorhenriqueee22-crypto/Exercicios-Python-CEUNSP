@@ -41,9 +41,14 @@ ARQUIVO_PDF = PASTA_DOCUMENTOS / "Proposta_Projeto_GLP_ABNT.pdf"
 FIGURA_PAINEL = PASTA_DOCUMENTOS / "figuras" / "painel_estatistica_antes_depois.png"
 
 # Identificação (completar; não inventar nomes de integrantes)
-INTEGRANTES = ["Vitor Henrique Santos Das Virgens"]   # até 4 integrantes
-CIDADE = "[Cidade]"
-ORIENTADOR = "[Nome da professora da disciplina]"
+INTEGRANTES = [   # até 4 integrantes, com RGM
+    "Vitor Henrique Santos Das Virgens – RGM 48303577",
+    "Sergio Junior – RGM 50097237",
+    "Raul Amaral – RGM 5049502000",
+    "Luis Henrique – RGM 046624929",
+]
+CIDADE = "Salto"
+ORIENTADOR = "Vanessa Silva Pereira Araujo"
 ROTULO_ORIENTADOR = "Professora"
 DATA_ACESSO = "13 nov. 2026"
 REPOSITORIO = "https://github.com/vitorhenriqueee22-crypto/Exercicios-Python-CEUNSP"
